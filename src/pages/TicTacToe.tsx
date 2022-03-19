@@ -83,24 +83,28 @@ const TicTacToe = () => {
         })
 
         socket.emit(TicTacToeActionsEnum.PLAYER_JOIN_ROOM_FROM_CLIENT, { roomId, gameKey: 'tic-tac-toe' })
+
+        return () => {
+            socket.close()
+        }
     }, [])
 
     return (
         <>
             {isLoading ? (
-                <div className="center-page-absolute">
+                <div className="center-page">
                     <CircularProgress color="inherit" />
                 </div>
             ) : isRoomFull ? (
                 <RoomFull />
             ) : (
-                <>
+                <div className="center-page">
                     <GameInfoPanel>
                         {isWaitingForPlayers && <WaitForPlayers />}
                         {isOpenRestartGame && <RestartGame />}
                     </GameInfoPanel>
                     <TicTacToeGrid />
-                </>
+                </div>
             )}
 
             <Snackbar

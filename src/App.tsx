@@ -1,8 +1,8 @@
 import React from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 
-import Header from '@components/Header/Header'
-import BodyWrapper from '@components/Body/BodyWrapper'
+import Header from '@components/Header'
+import BodyWrapper from '@components/BodyWrapper'
 
 import MainPage from '@pages/MainPage'
 import TicTacToe from '@pages/TicTacToe'
