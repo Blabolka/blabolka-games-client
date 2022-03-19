@@ -1,0 +1,79 @@
+.tic-tac-toe-grid {
+    display: flex;
+    flex-direction: column;
+
+    height: 100%;
+    width: 100%;
+
+    &__wrapper {
+        margin: 0 auto;
+        display: flex;
+        justify-content: center;
+
+        @media screen and (orientation: landscape) {
+            width: calc(90vh - 65px);
+            height: calc(90vh - 65px);
+        }
+
+        @media screen and (orientation: portrait) {
+            width: 90vw;
+            height: 90vw;
+        }
+    }
+
+    &__row {
+        display: flex;
+        flex-direction: row;
+        height: 100%;
+    }
+
+    &__cell {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        user-select: none;
+        border: 3px solid #17252A;
+
+        img {
+            width: 75%;
+            height: 75%;
+        }
+    }
+
+    /* ******************************************** PRETTY BORDERS ********************************************* */
+    &__row:first-child {
+        div:first-child, div:last-child, div:not(:first-child):not(:last-child) {
+            border-top: 0;
+        }
+
+        div:first-child {
+            border-left: 0;
+        }
+        div:last-child {
+            border-right: 0;
+        }
+    }
+    &__row:not(:first-child):not(:last-child) {
+        div:first-child {
+            border-left: 0;
+        }
+        div:last-child {
+            border-right: 0;
+        }
+    }
+
+    &__row:last-child {
+        div:first-child, div:last-child, div:not(:first-child):not(:last-child) {
+            border-bottom: 0;
+        }
+
+        div:first-child {
+            border-left: 0;
+        }
+        div:last-child {
+            border-right: 0;
+        }
+    }
+}
