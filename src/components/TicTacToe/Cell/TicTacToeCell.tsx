@@ -70,6 +70,10 @@ const TicTacToeCell = ({ ticTacToeCell }: TicTacToeCellProps) => {
         }
     }, [ticTacToeCell.cellData.isClicked])
 
+    useEffect(() => {
+        setIsCellOnHover(false)
+    }, [ticTacToeGrid])
+
     return (
         <div
             className="tic-tac-toe-grid__cell"

@@ -7,8 +7,6 @@ import BodyWrapper from '@components/BodyWrapper'
 import MainPage from '@pages/MainPage'
 import TicTacToe from '@pages/TicTacToe'
 
-import '@socket'
-
 const App = () => {
     return (
         <BrowserRouter>
