@@ -1,0 +1,41 @@
+.modal-window {
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    padding: 15px;
+    width: 400px;
+
+    background-color: #FFFFFF;
+    border-radius: 5px;
+
+    &__wrapper {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    &__body {
+        margin-top: 20px;
+        margin-bottom: 10px;
+    }
+
+    &__actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 15px;
+    }
+}
+
+@media screen and (max-width: 415px) {
+    .modal-window {
+        width: 335px;
+    }
+}
+
+@media screen and (max-width: 350px) {
+    .modal-window {
+        width: 265px;
+    }
+}
+

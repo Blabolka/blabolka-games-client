@@ -5,3 +5,7 @@ export enum TicTacToeTypes {
     SET_IS_GRID_DISABLED = 'ticTacToe/setIsGridDisabled',
     SET_IS_RESTART_BUTTON_HIDE = 'ticTacToe/setIsRestartButtonHide',
 }
+
+export enum ModalWindowTypes {
+    SET_MODAL_WINDOW = 'modalWindow/setModalWindow',
+}
