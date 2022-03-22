@@ -24,7 +24,7 @@ export type RestartGame = {
     message: string
 }
 
-export enum TicTacToeGridSizes {
+export enum TicTacToeGridSizesEnum {
     THREE_BY_THREE = '3x3',
     FIVE_BY_FIVE = '5x5',
     SEVEN_BY_SEVEN = '7x7',

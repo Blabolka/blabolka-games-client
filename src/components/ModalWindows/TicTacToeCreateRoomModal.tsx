@@ -2,7 +2,11 @@ import React, { useRef, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '@hooks'
 import { setModalWindow } from '@redux-actions/modalWindowActions'
 
-import { TicTacToeGridSizes } from '@entityTypes/ticTacToe'
+import { TicTacToeGridSizesEnum } from '@entityTypes/ticTacToe'
+import { RoomBaseInfo, RoomTypesEnum } from '@entityTypes/room'
+import { getValuesInRowToFinishByGridSize } from '@utils/ticTacToe'
+
+import { createRoom } from '@api'
 
 import './TicTacToeCreateRoomModal.less'
 
@@ -25,7 +29,7 @@ const TicTacToeCreateRoomModal = () => {
     const modalWindow = useAppSelector((state) => state.modalWindow)
 
     const [buttonIsLoading, setButtonIsLoading] = useState(false)
-    const [gridSizeSelectValue, setGridSizeSelectValue] = useState(TicTacToeGridSizes.THREE_BY_THREE)
+    const [gridSizeSelectValue, setGridSizeSelectValue] = useState(TicTacToeGridSizesEnum.THREE_BY_THREE)
     const [isPrivate, setIsPrivate] = useState(false)
     const inputPasswordRef = useRef({ value: '' })
 
@@ -40,13 +44,26 @@ const TicTacToeCreateRoomModal = () => {
     const onModalClose = () => {
         if (!buttonIsLoading) {
             dispatch(setModalWindow({ ...modalWindow, isOpen: false }))
-            setGridSizeSelectValue(TicTacToeGridSizes.THREE_BY_THREE)
+            setGridSizeSelectValue(TicTacToeGridSizesEnum.THREE_BY_THREE)
             setIsPrivate(false)
         }
     }
 
-    const onLoadingButtonClick = () => {
+    const onLoadingButtonClick = async () => {
         setButtonIsLoading(true)
+        const roomInfo: RoomBaseInfo = {
+            roomType: RoomTypesEnum.TIC_TAC_TOE,
+            roomInfo: {
+                gridSize: gridSizeSelectValue,
+                valuesInRowToFinish: getValuesInRowToFinishByGridSize(gridSizeSelectValue),
+            },
+            isPrivate: isPrivate,
+            password: inputPasswordRef.current.value,
+        }
+
+        await createRoom(roomInfo)
+
+        setButtonIsLoading(false)
     }
 
     return (
@@ -59,21 +76,21 @@ const TicTacToeCreateRoomModal = () => {
                             <FormControl size="small">
                                 <InputLabel id="grid-size-select-label">Grid size</InputLabel>
                                 <Select
-                                    defaultValue={TicTacToeGridSizes.THREE_BY_THREE}
+                                    defaultValue={TicTacToeGridSizesEnum.THREE_BY_THREE}
                                     labelId="grid-size-select-label"
                                     label="Grid size"
                                     onChange={onGridSizeSelectChange}
                                 >
-                                    <MenuItem value={TicTacToeGridSizes.THREE_BY_THREE}>
-                                        {TicTacToeGridSizes.THREE_BY_THREE}
+                                    <MenuItem value={TicTacToeGridSizesEnum.THREE_BY_THREE}>
+                                        {TicTacToeGridSizesEnum.THREE_BY_THREE}
                                     </MenuItem>
 
-                                    <MenuItem value={TicTacToeGridSizes.FIVE_BY_FIVE}>
-                                        {TicTacToeGridSizes.FIVE_BY_FIVE}
+                                    <MenuItem value={TicTacToeGridSizesEnum.FIVE_BY_FIVE}>
+                                        {TicTacToeGridSizesEnum.FIVE_BY_FIVE}
                                     </MenuItem>
 
-                                    <MenuItem value={TicTacToeGridSizes.SEVEN_BY_SEVEN}>
-                                        {TicTacToeGridSizes.SEVEN_BY_SEVEN}
+                                    <MenuItem value={TicTacToeGridSizesEnum.SEVEN_BY_SEVEN}>
+                                        {TicTacToeGridSizesEnum.SEVEN_BY_SEVEN}
                                     </MenuItem>
                                 </Select>
                             </FormControl>

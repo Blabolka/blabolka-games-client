@@ -1,6 +1,6 @@
 import { io } from 'socket.io-client'
 
-const connectionUrl = process.env.SOCKET_CONNECTION_URL
+const connectionUrl = process.env.SERVER_BASE_URL
 
 // every time start with websocket connection first
 const connectionParams = {

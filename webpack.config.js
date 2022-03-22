@@ -16,6 +16,7 @@ module.exports = (env, arguments) => {
             extensions: ['.tsx', '.ts', '.js'],
             roots: [__dirname],
             alias: {
+                '@api': path.resolve('src', 'api'),
                 '@hooks': path.resolve('src', 'app', 'hooks'),
                 '@assets': path.resolve('src', 'assets'),
                 '@components': path.resolve('src', 'components'),
@@ -38,6 +39,9 @@ module.exports = (env, arguments) => {
                         options: {
                             cacheDirectory: true,
                             presets: ['@babel/preset-env', '@babel/preset-react', '@babel/preset-typescript'],
+                            plugins: [
+                                ['@babel/transform-runtime'],
+                            ],
                         },
                     },
                 },

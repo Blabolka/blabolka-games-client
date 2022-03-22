@@ -20,6 +20,7 @@ import RestartGame from '@components/InfoPanelComponents/RestartGame'
 import CircularProgress from '@mui/material/CircularProgress'
 import Snackbar from '@mui/material/Snackbar'
 
+import { RoomTypesEnum } from '@entityTypes/room'
 import { TicTacToeActionsEnum } from '@entityTypes/socket'
 import { TicTacToePlayer } from '@entityTypes/ticTacToePlayer'
 
@@ -82,7 +83,7 @@ const TicTacToe = () => {
             dispatch(setIsGridDisabled(false))
         })
 
-        socket.emit(TicTacToeActionsEnum.PLAYER_JOIN_ROOM_FROM_CLIENT, { roomId, gameKey: 'tic-tac-toe' })
+        socket.emit(TicTacToeActionsEnum.PLAYER_JOIN_ROOM_FROM_CLIENT, { roomId, gameKey: RoomTypesEnum.TIC_TAC_TOE })
 
         return () => {
             socket.close()
