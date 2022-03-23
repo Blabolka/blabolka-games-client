@@ -1,4 +1,4 @@
-import { TicTacToeGridSizesEnum } from '@entityTypes/ticTacToe'
+import { TicTacToeGridSizeKeysEnum } from '@entityTypes/ticTacToe'
 
 export type RoomFullInfo = {
     _id?: string
@@ -13,7 +13,7 @@ export type RoomBaseInfo = {
 }
 
 type TicTacToeRoomParams = {
-    gridSize: TicTacToeGridSizesEnum
+    gridSize: TicTacToeGridSizeKeysEnum
     valuesInRowToFinish: number
 }
 

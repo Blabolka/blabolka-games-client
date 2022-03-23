@@ -17,6 +17,11 @@ export const setTicTacToeCell = (ticTacToeCellData: CellFullData) => ({
     payload: ticTacToeCellData,
 })
 
+export const setValuesInRowToFinish = (value: number) => ({
+    type: TicTacToeTypes.SET_TIC_TAC_TOE_VALUES_IN_ROW_TO_FINISH,
+    payload: value,
+})
+
 export const setIsGridDisabled = (state: boolean) => ({
     type: TicTacToeTypes.SET_IS_GRID_DISABLED,
     payload: state,

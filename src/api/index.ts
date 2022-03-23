@@ -1,4 +1,4 @@
-import basicAxios from 'axios'
+import basicAxios, { AxiosResponse } from 'axios'
 
 import { RoomBaseInfo, RoomFullInfo } from '@entityTypes/room'
 
@@ -10,6 +10,12 @@ const axios = serverBaseUrl
       })
     : basicAxios
 
-export const createRoom: (roomInfo: RoomBaseInfo) => Promise<RoomFullInfo> = async (roomInfo: RoomBaseInfo) => {
+export const getRoomById: (roomId: string) => Promise<AxiosResponse<RoomFullInfo>> = async (roomId: string) => {
+    return axios.get(`/room/${roomId}`)
+}
+
+export const createRoom: (roomInfo: RoomBaseInfo) => Promise<AxiosResponse<RoomFullInfo>> = async (
+    roomInfo: RoomBaseInfo,
+) => {
     return axios.post('/room', { ...roomInfo })
 }

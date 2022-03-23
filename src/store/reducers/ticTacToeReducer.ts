@@ -38,6 +38,9 @@ const ticTacToeReducer = (state = initialState, action) => {
 
             return { ...state }
         }
+        case TicTacToeTypes.SET_TIC_TAC_TOE_VALUES_IN_ROW_TO_FINISH: {
+            return { ...state, valuesInRowToFinish: action.payload }
+        }
         case TicTacToeTypes.SET_IS_GRID_DISABLED: {
             return { ...state, isGridDisabled: action.payload }
         }

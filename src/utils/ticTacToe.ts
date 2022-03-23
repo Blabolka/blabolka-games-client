@@ -1,4 +1,4 @@
-import { CellProps, CellFullData, TicTacToeGridSizesEnum } from '@entityTypes/ticTacToe'
+import { CellProps, CellFullData, TicTacToeGridSizeKeysEnum, TicTacToeGridSize } from '@entityTypes/ticTacToe'
 
 export const getTicTacToeArray = (rowCount, columnCount): CellFullData[][] => {
     const basicCellInfoArray: CellProps[][] = Array(rowCount).fill(
@@ -18,15 +18,28 @@ export const getTicTacToeArray = (rowCount, columnCount): CellFullData[][] => {
     })
 }
 
-export const getValuesInRowToFinishByGridSize = (gridSize: TicTacToeGridSizesEnum): number => {
+export const getValuesInRowToFinishByGridSizeKey = (gridSize: TicTacToeGridSizeKeysEnum): number => {
     switch (gridSize) {
-        case TicTacToeGridSizesEnum.THREE_BY_THREE:
+        case TicTacToeGridSizeKeysEnum.THREE_BY_THREE:
             return 3
-        case TicTacToeGridSizesEnum.FIVE_BY_FIVE:
+        case TicTacToeGridSizeKeysEnum.FIVE_BY_FIVE:
             return 4
-        case TicTacToeGridSizesEnum.SEVEN_BY_SEVEN:
+        case TicTacToeGridSizeKeysEnum.SEVEN_BY_SEVEN:
             return 4
         default:
             return 3
+    }
+}
+
+export const getGridSizeByGridSizeKey = (gridSize: TicTacToeGridSizeKeysEnum): TicTacToeGridSize => {
+    switch (gridSize) {
+        case TicTacToeGridSizeKeysEnum.THREE_BY_THREE:
+            return { rowCount: 3, columnCount: 3 }
+        case TicTacToeGridSizeKeysEnum.FIVE_BY_FIVE:
+            return { rowCount: 5, columnCount: 5 }
+        case TicTacToeGridSizeKeysEnum.SEVEN_BY_SEVEN:
+            return { rowCount: 7, columnCount: 7 }
+        default:
+            return { rowCount: 3, columnCount: 3 }
     }
 }

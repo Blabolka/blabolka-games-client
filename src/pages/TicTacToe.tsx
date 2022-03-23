@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 
 import { useAppSelector, useAppDispatch } from '@hooks'
 import {
     setTicTacToePlayer,
     setTicTacToeGrid,
     setTicTacToeCell,
+    setValuesInRowToFinish,
     setIsGridDisabled,
     setRestartGame,
 } from '@redux-actions/ticTacToeActions'
 
-import { getTicTacToeArray } from '@utils/ticTacToe'
+import { getRoomById } from '@api'
+
+import { getTicTacToeArray, getGridSizeByGridSizeKey } from '@utils/ticTacToe'
 import GameInfoPanel from '@components/GameInfoPanel'
 import TicTacToeGrid from '@components/TicTacToe/TicTacToeGrid'
 import RoomFull from '@components/EmptyStates/RoomFull'
@@ -20,27 +23,30 @@ import RestartGame from '@components/InfoPanelComponents/RestartGame'
 import CircularProgress from '@mui/material/CircularProgress'
 import Snackbar from '@mui/material/Snackbar'
 
-import { RoomTypesEnum } from '@entityTypes/room'
+import { RoomTypesEnum, RoomFullInfo } from '@entityTypes/room'
 import { TicTacToeActionsEnum } from '@entityTypes/socket'
+import { TicTacToeGridSize } from '@entityTypes/ticTacToe'
 import { TicTacToePlayer } from '@entityTypes/ticTacToePlayer'
 
 import socket from '@socket'
 
 const TicTacToe = () => {
+    const navigate = useNavigate()
     const dispatch = useAppDispatch()
-    const isOpenRestartGame = useAppSelector((state) => state.ticTacToe.restartGame.isOpen)
     const { roomId } = useParams()
 
     const [isLoading, setIsLoading] = useState(true)
-    const [snackBar, setSnackBar] = useState({ open: false, message: '' })
+    const isOpenRestartGame = useAppSelector((state) => state.ticTacToe.restartGame.isOpen)
     const [isWaitingForPlayers, setIsWaitingForPlayers] = useState(false)
+
     const [isRoomFull, setIsRoomFull] = useState(false)
+    const [snackBar, setSnackBar] = useState({ open: false, message: '' })
 
-    const onOpponentLeave = () => {
-        setSnackBar({ open: false, message: '' })
-    }
+    const initSocketListeners = (room: RoomFullInfo) => {
+        socket.connect()
+        const ticTacToeGridSize: TicTacToeGridSize = getGridSizeByGridSizeKey(room.roomInfo.gridSize)
+        dispatch(setValuesInRowToFinish(room.roomInfo.valuesInRowToFinish))
 
-    useEffect(() => {
         socket.on(TicTacToeActionsEnum.ROOM_IS_FULL_FROM_SERVER, () => {
             setIsRoomFull(true)
             setIsLoading(false)
@@ -50,7 +56,7 @@ const TicTacToe = () => {
             setIsWaitingForPlayers(true)
             setIsLoading(false)
             dispatch(setIsGridDisabled(true))
-            dispatch(setTicTacToeGrid(getTicTacToeArray(3, 3)))
+            dispatch(setTicTacToeGrid(getTicTacToeArray(ticTacToeGridSize.rowCount, ticTacToeGridSize.columnCount)))
             dispatch(setTicTacToePlayer(null))
         })
 
@@ -59,7 +65,7 @@ const TicTacToe = () => {
             setIsLoading(false)
             dispatch(setRestartGame({ isOpen: false, isButtonClicked: false, message: '' }))
             dispatch(setIsGridDisabled(!player.isTurnToStartGame))
-            dispatch(setTicTacToeGrid(getTicTacToeArray(3, 3)))
+            dispatch(setTicTacToeGrid(getTicTacToeArray(ticTacToeGridSize.rowCount, ticTacToeGridSize.columnCount)))
             dispatch(setTicTacToePlayer(player))
 
             if (player.isTurnToStartGame) {
@@ -74,7 +80,7 @@ const TicTacToe = () => {
             setSnackBar({ open: true, message: 'Оппонент покинул игру' })
             setIsWaitingForPlayers(true)
             dispatch(setIsGridDisabled(true))
-            dispatch(setTicTacToeGrid(getTicTacToeArray(3, 3)))
+            dispatch(setTicTacToeGrid(getTicTacToeArray(ticTacToeGridSize.rowCount, ticTacToeGridSize.columnCount)))
             dispatch(setTicTacToePlayer(null))
         })
 
@@ -84,9 +90,28 @@ const TicTacToe = () => {
         })
 
         socket.emit(TicTacToeActionsEnum.PLAYER_JOIN_ROOM_FROM_CLIENT, { roomId, gameKey: RoomTypesEnum.TIC_TAC_TOE })
+    }
+
+    const onOpponentLeave = () => {
+        setSnackBar({ open: false, message: '' })
+    }
+
+    useEffect(() => {
+        const fetchRoomData = async () => {
+            const roomInfo = await getRoomById(roomId || '')
+
+            if (roomInfo.data) {
+                initSocketListeners(roomInfo.data)
+            } else {
+                navigate('/')
+            }
+        }
+
+        fetchRoomData().then()
 
         return () => {
-            socket.close()
+            socket.removeAllListeners()
+            socket.disconnect()
         }
     }, [])
 
