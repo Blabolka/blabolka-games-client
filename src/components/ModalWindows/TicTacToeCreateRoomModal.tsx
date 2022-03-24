@@ -20,10 +20,12 @@ import {
     Checkbox,
     TextField,
     InputLabel,
+    IconButton,
     FormControl,
     FormControlLabel,
 } from '@mui/material'
 import LoadingButton from '@mui/lab/LoadingButton'
+import { Visibility, VisibilityOff } from '@mui/icons-material'
 
 const TicTacToeCreateRoomModal = () => {
     const navigate = useNavigate()
@@ -33,6 +35,7 @@ const TicTacToeCreateRoomModal = () => {
     const [buttonIsLoading, setButtonIsLoading] = useState(false)
     const [gridSizeSelectValue, setGridSizeSelectValue] = useState(TicTacToeGridSizeKeysEnum.THREE_BY_THREE)
     const [isPrivate, setIsPrivate] = useState(false)
+    const [isShowPassword, setIsShowPassword] = useState(false)
     const inputPasswordRef = useRef({ value: '' })
 
     const onGridSizeSelectChange = (element) => {
@@ -41,6 +44,10 @@ const TicTacToeCreateRoomModal = () => {
 
     const onCheckboxChange = (element) => {
         setIsPrivate(element.target.checked)
+    }
+
+    const onShowPasswordToggle = () => {
+        setIsShowPassword(!isShowPassword)
     }
 
     const onModalClose = () => {
@@ -114,11 +121,18 @@ const TicTacToeCreateRoomModal = () => {
                         <FormControl fullWidth>
                             <TextField
                                 disabled={!isPrivate}
-                                type="password"
+                                type={isShowPassword ? 'text' : 'password'}
                                 label="Password"
                                 variant="outlined"
                                 size="small"
                                 inputRef={inputPasswordRef}
+                                InputProps={{
+                                    endAdornment: (
+                                        <IconButton size="small" disabled={!isPrivate} onClick={onShowPasswordToggle}>
+                                            {isShowPassword ? <Visibility /> : <VisibilityOff />}
+                                        </IconButton>
+                                    ),
+                                }}
                             />
                         </FormControl>
                     </div>

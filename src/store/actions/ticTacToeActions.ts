@@ -1,6 +1,11 @@
 import { TicTacToeTypes } from '../types'
 import { TicTacToePlayer } from '@entityTypes/ticTacToePlayer'
-import { CellFullData, RestartGame } from '@entityTypes/ticTacToe'
+import { CellFullData, RestartGame, InitialStateType } from '@entityTypes/ticTacToe'
+
+export const setTicTacToe = (ticTacToeData: InitialStateType) => ({
+    type: TicTacToeTypes.SET_TIC_TAC_TOE,
+    payload: ticTacToeData,
+})
 
 export const setTicTacToePlayer = (player: TicTacToePlayer | null) => ({
     type: TicTacToeTypes.SET_PLAYER,

@@ -1,4 +1,5 @@
 export enum TicTacToeTypes {
+    SET_TIC_TAC_TOE = 'ticTacToe/set',
     SET_PLAYER = 'ticTacToe/setPlayer',
     SET_TIC_TAC_TOE_GRID = 'ticTacToe/setTicTacToeGrid',
     SET_TIC_TAC_TOE_CELL = 'ticTacToe/setTicTacToeCell',

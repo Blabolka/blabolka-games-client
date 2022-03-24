@@ -1,4 +1,20 @@
-import { CellProps, CellFullData, TicTacToeGridSizeKeysEnum, TicTacToeGridSize } from '@entityTypes/ticTacToe'
+import {
+    CellProps,
+    CellFullData,
+    TicTacToeGridSizeKeysEnum,
+    TicTacToeGridSize,
+    InitialStateType,
+} from '@entityTypes/ticTacToe'
+
+export const getTicTacToeInitialState = (): InitialStateType => {
+    return {
+        player: null,
+        ticTacToeGrid: getTicTacToeArray(3, 3),
+        valuesInRowToFinish: 3,
+        isGridDisabled: true,
+        restartGame: { isOpen: false, isButtonClicked: true, message: '' },
+    }
+}
 
 export const getTicTacToeArray = (rowCount, columnCount): CellFullData[][] => {
     const basicCellInfoArray: CellProps[][] = Array(rowCount).fill(

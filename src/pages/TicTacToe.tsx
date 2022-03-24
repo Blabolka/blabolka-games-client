@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 
 import { useAppSelector, useAppDispatch } from '@hooks'
 import {
+    setTicTacToe,
     setTicTacToePlayer,
     setTicTacToeGrid,
     setTicTacToeCell,
@@ -13,12 +14,13 @@ import {
 
 import { getRoomById } from '@api'
 
-import { getTicTacToeArray, getGridSizeByGridSizeKey } from '@utils/ticTacToe'
+import { getTicTacToeInitialState, getTicTacToeArray, getGridSizeByGridSizeKey } from '@utils/ticTacToe'
 import GameInfoPanel from '@components/GameInfoPanel'
 import TicTacToeGrid from '@components/TicTacToe/TicTacToeGrid'
 import RoomFull from '@components/EmptyStates/RoomFull'
-import WaitForPlayers from '@components/InfoPanelComponents/WaitForPlayers'
 import RestartGame from '@components/InfoPanelComponents/RestartGame'
+import ShareLinkPanel from '@components/InfoPanelComponents/ShareLinkPanel'
+import WaitForPlayers from '@components/InfoPanelComponents/WaitForPlayers'
 
 import CircularProgress from '@mui/material/CircularProgress'
 import Snackbar from '@mui/material/Snackbar'
@@ -92,7 +94,7 @@ const TicTacToe = () => {
         socket.emit(TicTacToeActionsEnum.PLAYER_JOIN_ROOM_FROM_CLIENT, { roomId, gameKey: RoomTypesEnum.TIC_TAC_TOE })
     }
 
-    const onOpponentLeave = () => {
+    const onSnackbarClose = () => {
         setSnackBar({ open: false, message: '' })
     }
 
@@ -110,6 +112,7 @@ const TicTacToe = () => {
         fetchRoomData().then()
 
         return () => {
+            dispatch(setTicTacToe(getTicTacToeInitialState()))
             socket.removeAllListeners()
             socket.disconnect()
         }
@@ -125,17 +128,20 @@ const TicTacToe = () => {
                 <RoomFull />
             ) : (
                 <div className="center-page">
-                    <GameInfoPanel>
-                        {isWaitingForPlayers && <WaitForPlayers />}
+                    <GameInfoPanel height="70px">
+                        {isWaitingForPlayers && <ShareLinkPanel />}
                         {isOpenRestartGame && <RestartGame />}
                     </GameInfoPanel>
+
                     <TicTacToeGrid />
+
+                    <GameInfoPanel height="40px">{isWaitingForPlayers && <WaitForPlayers />}</GameInfoPanel>
                 </div>
             )}
 
             <Snackbar
                 open={snackBar.open}
-                onClose={onOpponentLeave}
+                onClose={onSnackbarClose}
                 autoHideDuration={4000}
                 message={snackBar.message}
             />
