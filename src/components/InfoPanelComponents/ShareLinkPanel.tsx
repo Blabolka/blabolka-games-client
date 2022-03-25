@@ -16,8 +16,6 @@ const ShareLinkPanel = () => {
         setIsCopied(true)
         setIsSnackbarOpen(true)
         copy(window.location.href)
-
-        // window.navigator.clipboard.writeText(window.location.href).then(() => {})
     }
 
     const onCopyLinkMouseEnter = () => {
@@ -44,7 +42,7 @@ const ShareLinkPanel = () => {
             >
                 <span className="font-size-16px">Copy invite link</span>
                 <Chip
-                    sx={{ marginLeft: '5px', fontSize: '14px' }}
+                    sx={{ fontSize: 'clamp(10px, 3.9vw, 20px)' }}
                     label={window.location.href}
                     variant="outlined"
                     color={!isCopied ? 'default' : 'success'}

@@ -1,15 +1,15 @@
-import React, { ReactNode } from 'react'
+import React, { CSSProperties, ReactNode } from 'react'
 
 import './GameInfoPanel.less'
 
 type GameInfoPanelProps = {
     children: ReactNode
-    height: string
+    styles: CSSProperties
 }
 
-const GameInfoPanel = ({ children, height }: GameInfoPanelProps) => {
+const GameInfoPanel = ({ children, styles }: GameInfoPanelProps) => {
     return (
-        <div style={{ height: height }} className="game-info-panel">
+        <div style={styles} className="game-info-panel">
             {children}
         </div>
     )

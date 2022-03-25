@@ -9,7 +9,7 @@ import {
 export const getTicTacToeInitialState = (): InitialStateType => {
     return {
         player: null,
-        ticTacToeGrid: getTicTacToeArray(3, 3),
+        ticTacToeGrid: [],
         valuesInRowToFinish: 3,
         isGridDisabled: true,
         restartGame: { isOpen: false, isButtonClicked: true, message: '' },

@@ -10,7 +10,8 @@ module.exports = (env, arguments) => {
         devtool: Boolean(arguments.mode === 'development') ? 'inline-source-map' : false,
         output: {
             path: path.resolve(__dirname, 'dist'),
-            filename: 'bundle.js',
+            filename: '[name].[contenthash].js',
+            chunkFilename: '[name].[chunkhash].js',
         },
         resolve: {
             extensions: ['.tsx', '.ts', '.js'],
@@ -27,7 +28,7 @@ module.exports = (env, arguments) => {
                 '@redux-store': path.resolve('src', 'store'),
                 '@entityTypes': path.resolve('src', 'types'),
                 '@utils': path.resolve('src', 'utils'),
-            }
+            },
         },
         module: {
             rules: [
@@ -37,9 +38,29 @@ module.exports = (env, arguments) => {
                     use: {
                         loader: 'babel-loader',
                         options: {
+                            babelrc: false,
                             cacheDirectory: true,
-                            presets: ['@babel/preset-env', '@babel/preset-react', '@babel/preset-typescript'],
+                            presets: [
+                                [
+                                    '@babel/preset-env',
+                                    {
+                                        corejs: { version: 3 },
+                                        useBuiltIns: 'entry',
+                                        targets: {
+                                            edge: '17',
+                                            firefox: '60',
+                                            chrome: '67',
+                                            safari: '11.1',
+                                            ie: '11',
+                                        },
+                                    },
+                                ],
+                                '@babel/preset-react',
+                                '@babel/preset-typescript',
+                            ],
                             plugins: [
+                                ['@babel/plugin-proposal-decorators', { decoratorsBeforeExport: true }],
+                                ['@babel/plugin-proposal-class-properties'],
                                 ['@babel/transform-runtime'],
                             ],
                         },
@@ -55,12 +76,23 @@ module.exports = (env, arguments) => {
                         {
                             loader: 'file-loader',
                             options: {
-                                name: 'img/[hash]-[name].[ext]',
+                                name: 'img/[name]-[hash].[ext]',
                             },
                         },
                     ],
                 },
             ],
+        },
+        optimization: {
+            splitChunks: {
+                cacheGroups: {
+                    vendor: {
+                        test: /[\\/]node_modules[\\/]/,
+                        name: 'vendors',
+                        chunks: 'all',
+                    },
+                },
+            },
         },
         plugins: [
             new HtmlWebpackPlugin({ template: path.join(__dirname, 'public', 'index.html') }),

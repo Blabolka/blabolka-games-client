@@ -22,7 +22,7 @@ import RestartGame from '@components/InfoPanelComponents/RestartGame'
 import ShareLinkPanel from '@components/InfoPanelComponents/ShareLinkPanel'
 import WaitForPlayers from '@components/InfoPanelComponents/WaitForPlayers'
 
-import CircularProgress from '@mui/material/CircularProgress'
+import Loading from '@components/Loading'
 import Snackbar from '@mui/material/Snackbar'
 
 import { RoomTypesEnum, RoomFullInfo } from '@entityTypes/room'
@@ -121,21 +121,21 @@ const TicTacToe = () => {
     return (
         <>
             {isLoading ? (
-                <div className="center-page">
-                    <CircularProgress color="inherit" />
-                </div>
+                <Loading />
             ) : isRoomFull ? (
                 <RoomFull />
             ) : (
                 <div className="center-page">
-                    <GameInfoPanel height="70px">
+                    <GameInfoPanel styles={{ marginTop: '10px', marginBottom: '15px' }}>
                         {isWaitingForPlayers && <ShareLinkPanel />}
                         {isOpenRestartGame && <RestartGame />}
                     </GameInfoPanel>
 
                     <TicTacToeGrid />
 
-                    <GameInfoPanel height="40px">{isWaitingForPlayers && <WaitForPlayers />}</GameInfoPanel>
+                    <GameInfoPanel styles={{ marginTop: '15px', marginBottom: '10px' }}>
+                        {isWaitingForPlayers && <WaitForPlayers />}
+                    </GameInfoPanel>
                 </div>
             )}
 
