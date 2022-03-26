@@ -6,6 +6,7 @@
     "scripts": {
         "clean": "rimraf dist/**",
         "build": "npm run clean && webpack --mode production",
+        "build:netlify": "ts-node ./scripts/netlify-deploy-prepare.ts && npm run clean && webpack --mode production",
         "build:dev": "npm run clean && webpack serve --mode development",
         "lint:check": "eslint -c .eslintrc.json src/",
         "lint:fix": "eslint -c .eslintrc.json --fix src/"
@@ -31,7 +32,8 @@
         "redux-devtools-extension": "^2.13.9",
         "redux-thunk": "^2.4.1",
         "rimraf": "^3.0.2",
-        "socket.io-client": "^4.4.1"
+        "socket.io-client": "^4.4.1",
+        "ts-node": "^10.7.0"
     },
     "devDependencies": {
         "@babel/core": "^7.17.5",
