@@ -99,7 +99,10 @@ module.exports = (env, arguments) => {
             new CleanWebpackPlugin(),
             new Dotenv(),
             new CopyPlugin({
-                patterns: [{ from: 'public/favicon-controller.svg', to: 'img' }],
+                patterns: [
+                    { from: 'public/favicon-controller.svg', to: 'img' },
+                    { from: 'public/_redirects' },
+                ],
             }),
         ],
         devServer: {
