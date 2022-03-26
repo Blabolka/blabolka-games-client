@@ -1,17 +1,22 @@
 import { TicTacToeGridSizeKeysEnum } from '@entityTypes/ticTacToe'
 
-export type RoomFullInfo = {
-    _id?: string
+// SERVER RESPONSE TYPES
+export type RoomInfo = {
     roomId: string
-} & RoomBaseInfo
+    roomType: RoomTypesEnum
+    roomInfo: TicTacToeRoomParams
+    isPrivate: boolean
+}
 
-export type RoomBaseInfo = {
+// CLIENT TYPES
+export type CreateRoomInfo = {
     roomType: RoomTypesEnum
     roomInfo: TicTacToeRoomParams
     isPrivate: boolean
     password?: string
 }
 
+// Helpers
 type TicTacToeRoomParams = {
     gridSize: TicTacToeGridSizeKeysEnum
     valuesInRowToFinish: number

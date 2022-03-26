@@ -25,7 +25,7 @@ import WaitForPlayers from '@components/InfoPanelComponents/WaitForPlayers'
 import Loading from '@components/Loading'
 import Snackbar from '@mui/material/Snackbar'
 
-import { RoomTypesEnum, RoomFullInfo } from '@entityTypes/room'
+import { RoomTypesEnum, RoomInfo } from '@entityTypes/room'
 import { TicTacToeActionsEnum } from '@entityTypes/socket'
 import { TicTacToeGridSize } from '@entityTypes/ticTacToe'
 import { TicTacToePlayer } from '@entityTypes/ticTacToePlayer'
@@ -44,7 +44,7 @@ const TicTacToe = () => {
     const [isRoomFull, setIsRoomFull] = useState(false)
     const [snackBar, setSnackBar] = useState({ open: false, message: '' })
 
-    const initSocketListeners = (room: RoomFullInfo) => {
+    const initSocketListeners = (room: RoomInfo) => {
         socket.connect()
         const ticTacToeGridSize: TicTacToeGridSize = getGridSizeByGridSizeKey(room.roomInfo.gridSize)
         dispatch(setValuesInRowToFinish(room.roomInfo.valuesInRowToFinish))

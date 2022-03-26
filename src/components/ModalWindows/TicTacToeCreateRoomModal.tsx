@@ -4,10 +4,10 @@ import { useAppDispatch, useAppSelector } from '@hooks'
 import { setModalWindow } from '@redux-actions/modalWindowActions'
 
 import { TicTacToeGridSizeKeysEnum } from '@entityTypes/ticTacToe'
-import { RoomBaseInfo, RoomTypesEnum } from '@entityTypes/room'
+import { CreateRoomInfo, RoomTypesEnum } from '@entityTypes/room'
 import { getValuesInRowToFinishByGridSizeKey } from '@utils/ticTacToe'
 
-import { createRoom } from '@api'
+import { createRoom as createRoomRequest } from '@api'
 
 import './TicTacToeCreateRoomModal.less'
 
@@ -32,6 +32,7 @@ const TicTacToeCreateRoomModal = () => {
     const dispatch = useAppDispatch()
     const modalWindow = useAppSelector((state) => state.modalWindow)
 
+    const [validation, setValidation] = useState({ isPasswordError: false, passwordErrorMessage: '' })
     const [buttonIsLoading, setButtonIsLoading] = useState(false)
     const [gridSizeSelectValue, setGridSizeSelectValue] = useState(TicTacToeGridSizeKeysEnum.THREE_BY_THREE)
     const [isPrivate, setIsPrivate] = useState(false)
@@ -44,10 +45,19 @@ const TicTacToeCreateRoomModal = () => {
 
     const onCheckboxChange = (element) => {
         setIsPrivate(element.target.checked)
+        if (validation.isPasswordError) {
+            setValidation({ isPasswordError: false, passwordErrorMessage: '' })
+        }
     }
 
     const onShowPasswordToggle = () => {
         setIsShowPassword(!isShowPassword)
+    }
+
+    const onPasswordInputChange = () => {
+        if (validation.isPasswordError) {
+            setValidation({ isPasswordError: false, passwordErrorMessage: '' })
+        }
     }
 
     const onModalClose = () => {
@@ -55,22 +65,37 @@ const TicTacToeCreateRoomModal = () => {
             dispatch(setModalWindow({ ...modalWindow, isOpen: false }))
             setGridSizeSelectValue(TicTacToeGridSizeKeysEnum.THREE_BY_THREE)
             setIsPrivate(false)
+            setIsShowPassword(false)
+            setValidation({ isPasswordError: false, passwordErrorMessage: '' })
         }
     }
 
-    const onLoadingButtonClick = async () => {
+    const onCreateRoomButtonClick = async () => {
         setButtonIsLoading(true)
-        const roomInfo: RoomBaseInfo = {
+        const roomInfo: CreateRoomInfo = {
             roomType: RoomTypesEnum.TIC_TAC_TOE,
             roomInfo: {
                 gridSize: gridSizeSelectValue,
                 valuesInRowToFinish: getValuesInRowToFinishByGridSizeKey(gridSizeSelectValue),
             },
             isPrivate: isPrivate,
-            password: inputPasswordRef.current.value,
         }
 
-        const roomFullInfo = await createRoom(roomInfo)
+        if (isPrivate) {
+            if (inputPasswordRef.current.value) {
+                roomInfo.password = inputPasswordRef.current.value
+                createRoom(roomInfo)
+            } else {
+                setValidation({ isPasswordError: true, passwordErrorMessage: 'Password cannot be empty' })
+                setButtonIsLoading(false)
+            }
+        } else {
+            createRoom(roomInfo)
+        }
+    }
+
+    const createRoom = async (roomInfo: CreateRoomInfo) => {
+        const roomFullInfo = await createRoomRequest(roomInfo)
 
         setButtonIsLoading(false)
         onModalClose()
@@ -122,9 +147,11 @@ const TicTacToeCreateRoomModal = () => {
                             <TextField
                                 disabled={!isPrivate}
                                 type={isShowPassword ? 'text' : 'password'}
-                                label="Password"
+                                label={validation.isPasswordError ? validation.passwordErrorMessage : 'Password'}
+                                error={validation.isPasswordError}
                                 variant="outlined"
                                 size="small"
+                                onChange={onPasswordInputChange}
                                 inputRef={inputPasswordRef}
                                 InputProps={{
                                     endAdornment: (
@@ -144,7 +171,7 @@ const TicTacToeCreateRoomModal = () => {
                             loading={buttonIsLoading}
                             color="inherit"
                             variant="contained"
-                            onClick={onLoadingButtonClick}
+                            onClick={onCreateRoomButtonClick}
                         >
                             Create Room
                         </LoadingButton>
