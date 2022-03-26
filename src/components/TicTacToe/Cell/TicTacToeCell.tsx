@@ -63,7 +63,7 @@ const TicTacToeCell = ({ ticTacToeCell }: TicTacToeCellProps) => {
                     setRestartGame({
                         isOpen: true,
                         isButtonClicked: false,
-                        message: 'Хотите сыграть ещё раз?',
+                        message: 'Do you want to play again?',
                     }),
                 )
             }

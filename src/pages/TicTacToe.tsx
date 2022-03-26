@@ -1,23 +1,25 @@
-import React, { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 
-import { useAppSelector, useAppDispatch } from '@hooks'
+import { useAppDispatch, useAppSelector } from '@hooks'
 import {
-    setTicTacToe,
-    setTicTacToePlayer,
-    setTicTacToeGrid,
-    setTicTacToeCell,
-    setValuesInRowToFinish,
     setIsGridDisabled,
     setRestartGame,
+    setTicTacToe,
+    setTicTacToeCell,
+    setTicTacToeGrid,
+    setTicTacToePlayer,
+    setValuesInRowToFinish,
 } from '@redux-actions/ticTacToeActions'
 
 import { getRoomById } from '@api'
 
-import { getTicTacToeInitialState, getTicTacToeArray, getGridSizeByGridSizeKey } from '@utils/ticTacToe'
+import { getGridSizeByGridSizeKey, getTicTacToeArray, getTicTacToeInitialState } from '@utils/ticTacToe'
+
 import GameInfoPanel from '@components/GameInfoPanel'
 import TicTacToeGrid from '@components/TicTacToe/TicTacToeGrid'
-import RoomFull from '@components/EmptyStates/RoomFull'
+import FullRoom from '@components/EmptyStates/FullRoom'
+import PrivateRoom from '@components/EmptyStates/PrivateRoom'
 import RestartGame from '@components/InfoPanelComponents/RestartGame'
 import ShareLinkPanel from '@components/InfoPanelComponents/ShareLinkPanel'
 import WaitForPlayers from '@components/InfoPanelComponents/WaitForPlayers'
@@ -25,9 +27,9 @@ import WaitForPlayers from '@components/InfoPanelComponents/WaitForPlayers'
 import Loading from '@components/Loading'
 import Snackbar from '@mui/material/Snackbar'
 
-import { RoomTypesEnum, RoomInfo } from '@entityTypes/room'
+import { RoomTypesEnum, TicTacToeRoomParams } from '@entityTypes/room'
 import { TicTacToeActionsEnum } from '@entityTypes/socket'
-import { TicTacToeGridSize } from '@entityTypes/ticTacToe'
+import { TicTacToeGridSize, TicTacToeGridSizeKeysEnum } from '@entityTypes/ticTacToe'
 import { TicTacToePlayer } from '@entityTypes/ticTacToePlayer'
 
 import socket from '@socket'
@@ -36,18 +38,23 @@ const TicTacToe = () => {
     const navigate = useNavigate()
     const dispatch = useAppDispatch()
     const { roomId } = useParams()
+    const [ticTacToeRoomInfo, setTicTacToeRoomInfo] = useState<TicTacToeRoomParams>({
+        gridSize: TicTacToeGridSizeKeysEnum.THREE_BY_THREE,
+        valuesInRowToFinish: 3,
+    })
 
     const [isLoading, setIsLoading] = useState(true)
     const isOpenRestartGame = useAppSelector((state) => state.ticTacToe.restartGame.isOpen)
     const [isWaitingForPlayers, setIsWaitingForPlayers] = useState(false)
 
     const [isRoomFull, setIsRoomFull] = useState(false)
+    const [isRoomPrivate, setIsRoomPrivate] = useState(false)
     const [snackBar, setSnackBar] = useState({ open: false, message: '' })
 
-    const initSocketListeners = (room: RoomInfo) => {
+    const initSocketListeners = (roomInfo: TicTacToeRoomParams) => {
         socket.connect()
-        const ticTacToeGridSize: TicTacToeGridSize = getGridSizeByGridSizeKey(room.roomInfo.gridSize)
-        dispatch(setValuesInRowToFinish(room.roomInfo.valuesInRowToFinish))
+        const ticTacToeGridSize: TicTacToeGridSize = getGridSizeByGridSizeKey(roomInfo.gridSize)
+        dispatch(setValuesInRowToFinish(roomInfo.valuesInRowToFinish))
 
         socket.on(TicTacToeActionsEnum.ROOM_IS_FULL_FROM_SERVER, () => {
             setIsRoomFull(true)
@@ -71,15 +78,15 @@ const TicTacToe = () => {
             dispatch(setTicTacToePlayer(player))
 
             if (player.isTurnToStartGame) {
-                setSnackBar({ open: true, message: 'Вы ходите первыми' })
+                setSnackBar({ open: true, message: 'You go first' })
             } else {
-                setSnackBar({ open: true, message: 'Оппонент ходит первым' })
+                setSnackBar({ open: true, message: 'Opponent go first' })
             }
         })
 
         socket.on(TicTacToeActionsEnum.PLAYER_LEAVE_GAME_FROM_SERVER, () => {
             dispatch(setRestartGame({ isOpen: false, isButtonClicked: false, message: '' }))
-            setSnackBar({ open: true, message: 'Оппонент покинул игру' })
+            setSnackBar({ open: true, message: 'Opponent left the game' })
             setIsWaitingForPlayers(true)
             dispatch(setIsGridDisabled(true))
             dispatch(setTicTacToeGrid(getTicTacToeArray(ticTacToeGridSize.rowCount, ticTacToeGridSize.columnCount)))
@@ -94,16 +101,37 @@ const TicTacToe = () => {
         socket.emit(TicTacToeActionsEnum.PLAYER_JOIN_ROOM_FROM_CLIENT, { roomId, gameKey: RoomTypesEnum.TIC_TAC_TOE })
     }
 
+    const onPasswordValidationCallback = () => {
+        setIsRoomPrivate(false)
+        setIsLoading(true)
+        initSocketListeners(ticTacToeRoomInfo)
+    }
+
     const onSnackbarClose = () => {
         setSnackBar({ open: false, message: '' })
     }
 
     useEffect(() => {
         const fetchRoomData = async () => {
-            const roomInfo = await getRoomById(roomId || '')
+            const roomResponse = await getRoomById(roomId || '')
 
-            if (roomInfo.data) {
-                initSocketListeners(roomInfo.data)
+            if (roomResponse.data) {
+                setTicTacToeRoomInfo(roomResponse.data.roomInfo)
+                const numberOfParticipants = roomResponse.data.numberOfParticipants
+
+                if (numberOfParticipants === 0) {
+                    initSocketListeners(roomResponse.data.roomInfo)
+                } else if (numberOfParticipants === 2) {
+                    setIsRoomFull(true)
+                    setIsLoading(false)
+                } else {
+                    if (roomResponse.data.isPrivate) {
+                        setIsRoomPrivate(true)
+                        setIsLoading(false)
+                    } else {
+                        initSocketListeners(roomResponse.data.roomInfo)
+                    }
+                }
             } else {
                 navigate('/')
             }
@@ -122,18 +150,20 @@ const TicTacToe = () => {
         <>
             {isLoading ? (
                 <Loading />
+            ) : isRoomPrivate ? (
+                <PrivateRoom roomId={roomId || ''} passwordValidationCallback={onPasswordValidationCallback} />
             ) : isRoomFull ? (
-                <RoomFull />
+                <FullRoom />
             ) : (
                 <div className="center-page">
-                    <GameInfoPanel styles={{ marginTop: '10px', marginBottom: '15px' }}>
+                    <GameInfoPanel styles={{ height: '70px' }}>
                         {isWaitingForPlayers && <ShareLinkPanel />}
                         {isOpenRestartGame && <RestartGame />}
                     </GameInfoPanel>
 
                     <TicTacToeGrid />
 
-                    <GameInfoPanel styles={{ marginTop: '15px', marginBottom: '10px' }}>
+                    <GameInfoPanel styles={{ height: '40px' }}>
                         {isWaitingForPlayers && <WaitForPlayers />}
                     </GameInfoPanel>
                 </div>
