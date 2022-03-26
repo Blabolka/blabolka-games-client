@@ -97,10 +97,10 @@ module.exports = (env, arguments) => {
         plugins: [
             new HtmlWebpackPlugin({ template: path.join(__dirname, 'public', 'index.html') }),
             new CleanWebpackPlugin(),
-            new Dotenv(),
             new CopyPlugin({
                 patterns: [{ from: 'public/favicon-controller.svg', to: 'img' }],
             }),
+            ...(arguments.mode === 'development' ? [new Dotenv()] : []),
         ],
         devServer: {
             port: 3000,
