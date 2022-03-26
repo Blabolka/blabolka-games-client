@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "target": "es5",
+        "target": "es3",
         "module": "commonjs",
         "sourceMap": true,
         "outDir": "./compile",
@@ -23,6 +23,7 @@
         "jsx": "react",
         "baseUrl": "./src",
         "paths": {
+            "@api": ["api"],
             "@hooks": ["app/hooks"],
             "@assets/*": ["assets/*"],
             "@components/*": ["components/*"],

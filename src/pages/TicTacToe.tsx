@@ -1,45 +1,61 @@
-import React, { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 
-import { useAppSelector, useAppDispatch } from '@hooks'
+import { useAppDispatch, useAppSelector } from '@hooks'
 import {
-    setTicTacToePlayer,
-    setTicTacToeGrid,
-    setTicTacToeCell,
     setIsGridDisabled,
     setRestartGame,
+    setTicTacToe,
+    setTicTacToeCell,
+    setTicTacToeGrid,
+    setTicTacToePlayer,
+    setValuesInRowToFinish,
 } from '@redux-actions/ticTacToeActions'
 
-import { getTicTacToeArray } from '@utils/ticTacToe'
+import { getRoomById } from '@api'
+
+import { getGridSizeByGridSizeKey, getTicTacToeArray, getTicTacToeInitialState } from '@utils/ticTacToe'
+
 import GameInfoPanel from '@components/GameInfoPanel'
 import TicTacToeGrid from '@components/TicTacToe/TicTacToeGrid'
-import RoomFull from '@components/EmptyStates/RoomFull'
-import WaitForPlayers from '@components/InfoPanelComponents/WaitForPlayers'
+import FullRoom from '@components/EmptyStates/FullRoom'
+import PrivateRoom from '@components/EmptyStates/PrivateRoom'
 import RestartGame from '@components/InfoPanelComponents/RestartGame'
+import ShareLinkPanel from '@components/InfoPanelComponents/ShareLinkPanel'
+import WaitForPlayers from '@components/InfoPanelComponents/WaitForPlayers'
 
-import CircularProgress from '@mui/material/CircularProgress'
+import Loading from '@components/Loading'
 import Snackbar from '@mui/material/Snackbar'
 
+import { RoomTypesEnum, TicTacToeRoomParams } from '@entityTypes/room'
 import { TicTacToeActionsEnum } from '@entityTypes/socket'
+import { TicTacToeGridSize, TicTacToeGridSizeKeysEnum } from '@entityTypes/ticTacToe'
 import { TicTacToePlayer } from '@entityTypes/ticTacToePlayer'
 
 import socket from '@socket'
 
 const TicTacToe = () => {
+    const navigate = useNavigate()
     const dispatch = useAppDispatch()
-    const isOpenRestartGame = useAppSelector((state) => state.ticTacToe.restartGame.isOpen)
     const { roomId } = useParams()
+    const [ticTacToeRoomInfo, setTicTacToeRoomInfo] = useState<TicTacToeRoomParams>({
+        gridSize: TicTacToeGridSizeKeysEnum.THREE_BY_THREE,
+        valuesInRowToFinish: 3,
+    })
 
     const [isLoading, setIsLoading] = useState(true)
-    const [snackBar, setSnackBar] = useState({ open: false, message: '' })
+    const isOpenRestartGame = useAppSelector((state) => state.ticTacToe.restartGame.isOpen)
     const [isWaitingForPlayers, setIsWaitingForPlayers] = useState(false)
+
     const [isRoomFull, setIsRoomFull] = useState(false)
+    const [isRoomPrivate, setIsRoomPrivate] = useState(false)
+    const [snackBar, setSnackBar] = useState({ open: false, message: '' })
 
-    const onOpponentLeave = () => {
-        setSnackBar({ open: false, message: '' })
-    }
+    const initSocketListeners = (roomInfo: TicTacToeRoomParams) => {
+        socket.connect()
+        const ticTacToeGridSize: TicTacToeGridSize = getGridSizeByGridSizeKey(roomInfo.gridSize)
+        dispatch(setValuesInRowToFinish(roomInfo.valuesInRowToFinish))
 
-    useEffect(() => {
         socket.on(TicTacToeActionsEnum.ROOM_IS_FULL_FROM_SERVER, () => {
             setIsRoomFull(true)
             setIsLoading(false)
@@ -49,7 +65,7 @@ const TicTacToe = () => {
             setIsWaitingForPlayers(true)
             setIsLoading(false)
             dispatch(setIsGridDisabled(true))
-            dispatch(setTicTacToeGrid(getTicTacToeArray(3, 3)))
+            dispatch(setTicTacToeGrid(getTicTacToeArray(ticTacToeGridSize.rowCount, ticTacToeGridSize.columnCount)))
             dispatch(setTicTacToePlayer(null))
         })
 
@@ -58,22 +74,22 @@ const TicTacToe = () => {
             setIsLoading(false)
             dispatch(setRestartGame({ isOpen: false, isButtonClicked: false, message: '' }))
             dispatch(setIsGridDisabled(!player.isTurnToStartGame))
-            dispatch(setTicTacToeGrid(getTicTacToeArray(3, 3)))
+            dispatch(setTicTacToeGrid(getTicTacToeArray(ticTacToeGridSize.rowCount, ticTacToeGridSize.columnCount)))
             dispatch(setTicTacToePlayer(player))
 
             if (player.isTurnToStartGame) {
-                setSnackBar({ open: true, message: 'Вы ходите первыми' })
+                setSnackBar({ open: true, message: 'You go first' })
             } else {
-                setSnackBar({ open: true, message: 'Оппонент ходит первым' })
+                setSnackBar({ open: true, message: 'Opponent go first' })
             }
         })
 
         socket.on(TicTacToeActionsEnum.PLAYER_LEAVE_GAME_FROM_SERVER, () => {
             dispatch(setRestartGame({ isOpen: false, isButtonClicked: false, message: '' }))
-            setSnackBar({ open: true, message: 'Оппонент покинул игру' })
+            setSnackBar({ open: true, message: 'Opponent left the game' })
             setIsWaitingForPlayers(true)
             dispatch(setIsGridDisabled(true))
-            dispatch(setTicTacToeGrid(getTicTacToeArray(3, 3)))
+            dispatch(setTicTacToeGrid(getTicTacToeArray(ticTacToeGridSize.rowCount, ticTacToeGridSize.columnCount)))
             dispatch(setTicTacToePlayer(null))
         })
 
@@ -82,34 +98,80 @@ const TicTacToe = () => {
             dispatch(setIsGridDisabled(false))
         })
 
-        socket.emit(TicTacToeActionsEnum.PLAYER_JOIN_ROOM_FROM_CLIENT, { roomId, gameKey: 'tic-tac-toe' })
+        socket.emit(TicTacToeActionsEnum.PLAYER_JOIN_ROOM_FROM_CLIENT, { roomId, gameKey: RoomTypesEnum.TIC_TAC_TOE })
+    }
+
+    const onPasswordValidationCallback = () => {
+        setIsRoomPrivate(false)
+        setIsLoading(true)
+        initSocketListeners(ticTacToeRoomInfo)
+    }
+
+    const onSnackbarClose = () => {
+        setSnackBar({ open: false, message: '' })
+    }
+
+    useEffect(() => {
+        const fetchRoomData = async () => {
+            const roomResponse = await getRoomById(roomId || '')
+
+            if (roomResponse.data) {
+                setTicTacToeRoomInfo(roomResponse.data.roomInfo)
+                const numberOfParticipants = roomResponse.data.numberOfParticipants
+
+                if (numberOfParticipants === 0) {
+                    initSocketListeners(roomResponse.data.roomInfo)
+                } else if (numberOfParticipants === 2) {
+                    setIsRoomFull(true)
+                    setIsLoading(false)
+                } else {
+                    if (roomResponse.data.isPrivate) {
+                        setIsRoomPrivate(true)
+                        setIsLoading(false)
+                    } else {
+                        initSocketListeners(roomResponse.data.roomInfo)
+                    }
+                }
+            } else {
+                navigate('/')
+            }
+        }
+
+        fetchRoomData().then()
 
         return () => {
-            socket.close()
+            dispatch(setTicTacToe(getTicTacToeInitialState()))
+            socket.removeAllListeners()
+            socket.disconnect()
         }
     }, [])
 
     return (
         <>
             {isLoading ? (
-                <div className="center-page">
-                    <CircularProgress color="inherit" />
-                </div>
+                <Loading />
+            ) : isRoomPrivate ? (
+                <PrivateRoom roomId={roomId || ''} passwordValidationCallback={onPasswordValidationCallback} />
             ) : isRoomFull ? (
-                <RoomFull />
+                <FullRoom />
             ) : (
                 <div className="center-page">
-                    <GameInfoPanel>
-                        {isWaitingForPlayers && <WaitForPlayers />}
+                    <GameInfoPanel styles={{ height: '70px' }}>
+                        {isWaitingForPlayers && <ShareLinkPanel />}
                         {isOpenRestartGame && <RestartGame />}
                     </GameInfoPanel>
+
                     <TicTacToeGrid />
+
+                    <GameInfoPanel styles={{ height: '40px' }}>
+                        {isWaitingForPlayers && <WaitForPlayers />}
+                    </GameInfoPanel>
                 </div>
             )}
 
             <Snackbar
                 open={snackBar.open}
-                onClose={onOpponentLeave}
+                onClose={onSnackbarClose}
                 autoHideDuration={4000}
                 message={snackBar.message}
             />

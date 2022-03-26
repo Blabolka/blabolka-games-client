@@ -1,3 +1,5 @@
+import { TicTacToePlayer } from '@entityTypes/ticTacToePlayer'
+
 export enum CellValuesEnum {
     X = 'X',
     O = 'O',
@@ -24,8 +26,21 @@ export type RestartGame = {
     message: string
 }
 
-export enum TicTacToeGridSizes {
+export enum TicTacToeGridSizeKeysEnum {
     THREE_BY_THREE = '3x3',
     FIVE_BY_FIVE = '5x5',
     SEVEN_BY_SEVEN = '7x7',
+}
+
+export type TicTacToeGridSize = {
+    rowCount: number
+    columnCount: number
+}
+
+export type InitialStateType = {
+    player: TicTacToePlayer | null
+    ticTacToeGrid: CellFullData[][]
+    valuesInRowToFinish: number
+    isGridDisabled: boolean
+    restartGame: RestartGame
 }

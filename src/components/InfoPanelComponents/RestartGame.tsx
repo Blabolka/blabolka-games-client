@@ -14,7 +14,7 @@ const RestartGame = () => {
     const restartGame = useAppSelector((state) => state.ticTacToe.restartGame)
 
     const onRestartButtonClick = () => {
-        dispatch(setRestartGame({ isOpen: true, isButtonClicked: true, message: 'Ожидание оппонента...' }))
+        dispatch(setRestartGame({ isOpen: true, isButtonClicked: true, message: 'Waiting for opponent...' }))
         socket.emit(TicTacToeActionsEnum.PLAYER_WANT_PLAY_AGAIN_FROM_CLIENT, player)
     }
 

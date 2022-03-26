@@ -1,10 +1,12 @@
-import { io } from 'socket.io-client'
+import { io, SocketOptions, ManagerOptions } from 'socket.io-client'
 
-const connectionUrl = process.env.SOCKET_CONNECTION_URL
+const connectionUrl = process.env.SERVER_BASE_URL
 
 // every time start with websocket connection first
-const connectionParams = {
+const connectionParams: Partial<ManagerOptions & SocketOptions> = {
     transports: ['websocket' /*, 'polling'*/],
+    autoConnect: false,
+    withCredentials: true,
 }
 
 const socket = connectionUrl ? io(connectionUrl, connectionParams) : io(connectionParams)

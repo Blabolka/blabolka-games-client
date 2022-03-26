@@ -5,7 +5,7 @@ import './WaitForPlayers.less'
 const WaitForPlayers = () => {
     return (
         <span className="font-size-24px font-weight-medium">
-            Ожидание игроков<span className="loading-dots">...</span>
+            Waiting for players<span className="loading-dots">...</span>
         </span>
     )
 }

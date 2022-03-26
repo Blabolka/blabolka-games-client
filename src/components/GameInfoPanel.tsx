@@ -1,13 +1,18 @@
-import React, { ReactNode } from 'react'
+import React, { CSSProperties, ReactNode } from 'react'
 
 import './GameInfoPanel.less'
 
 type GameInfoPanelProps = {
     children: ReactNode
+    styles: CSSProperties
 }
 
-const GameInfoPanel = ({ children }: GameInfoPanelProps) => {
-    return <div className="game-info-panel">{children}</div>
+const GameInfoPanel = ({ children, styles }: GameInfoPanelProps) => {
+    return (
+        <div style={styles} className="game-info-panel">
+            {children}
+        </div>
+    )
 }
 
 export default GameInfoPanel

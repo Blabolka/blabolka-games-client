@@ -1,26 +1,14 @@
 import { TicTacToeTypes } from '../types'
-import { getTicTacToeArray } from '@utils/ticTacToe'
-import { TicTacToePlayer } from '@entityTypes/ticTacToePlayer'
-import { CellFullData, RestartGame } from '@entityTypes/ticTacToe'
+import { getTicTacToeInitialState } from '@utils/ticTacToe'
+import { InitialStateType } from '@entityTypes/ticTacToe'
 
-type InitialStateType = {
-    player: TicTacToePlayer | null
-    ticTacToeGrid: CellFullData[][]
-    valuesInRowToFinish: number
-    isGridDisabled: boolean
-    restartGame: RestartGame
-}
-
-const initialState: InitialStateType = {
-    player: null,
-    ticTacToeGrid: getTicTacToeArray(3, 3),
-    valuesInRowToFinish: 3,
-    isGridDisabled: true,
-    restartGame: { isOpen: false, isButtonClicked: true, message: '' },
-}
+const initialState: InitialStateType = getTicTacToeInitialState()
 
 const ticTacToeReducer = (state = initialState, action) => {
     switch (action.type) {
+        case TicTacToeTypes.SET_TIC_TAC_TOE: {
+            return { ...action.payload }
+        }
         case TicTacToeTypes.SET_PLAYER: {
             return { ...state, player: action.payload }
         }
@@ -37,6 +25,9 @@ const ticTacToeReducer = (state = initialState, action) => {
             })
 
             return { ...state }
+        }
+        case TicTacToeTypes.SET_TIC_TAC_TOE_VALUES_IN_ROW_TO_FINISH: {
+            return { ...state, valuesInRowToFinish: action.payload }
         }
         case TicTacToeTypes.SET_IS_GRID_DISABLED: {
             return { ...state, isGridDisabled: action.payload }

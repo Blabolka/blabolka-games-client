@@ -1,6 +1,11 @@
 import { TicTacToeTypes } from '../types'
 import { TicTacToePlayer } from '@entityTypes/ticTacToePlayer'
-import { CellFullData, RestartGame } from '@entityTypes/ticTacToe'
+import { CellFullData, RestartGame, InitialStateType } from '@entityTypes/ticTacToe'
+
+export const setTicTacToe = (ticTacToeData: InitialStateType) => ({
+    type: TicTacToeTypes.SET_TIC_TAC_TOE,
+    payload: ticTacToeData,
+})
 
 export const setTicTacToePlayer = (player: TicTacToePlayer | null) => ({
     type: TicTacToeTypes.SET_PLAYER,
@@ -15,6 +20,11 @@ export const setTicTacToeGrid = (ticTacToeGrid: CellFullData[][]) => ({
 export const setTicTacToeCell = (ticTacToeCellData: CellFullData) => ({
     type: TicTacToeTypes.SET_TIC_TAC_TOE_CELL,
     payload: ticTacToeCellData,
+})
+
+export const setValuesInRowToFinish = (value: number) => ({
+    type: TicTacToeTypes.SET_TIC_TAC_TOE_VALUES_IN_ROW_TO_FINISH,
+    payload: value,
 })
 
 export const setIsGridDisabled = (state: boolean) => ({
