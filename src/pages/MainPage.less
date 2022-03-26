@@ -1,0 +1,36 @@
+.game-preview {
+    &__wrapper {
+        padding: 20px;
+        background-color: #33938D;
+        border-radius: 10px;
+        cursor: pointer;
+    }
+
+    &__title {
+        margin-top: 10px;
+        color: #e5f5f4;
+        pointer-events: none;
+    }
+
+    &__image {
+        max-width: 200px;
+        width: 100%;
+        padding: 4px;
+        border-radius: 5px;
+
+        background-color: #e5f5f4;
+    }
+}
+
+/* mouse, touch pad */
+@media (hover: hover) and (pointer: fine) {
+    .game-preview {
+        &__wrapper {
+            transition: all 0.2s ease-in-out;
+        }
+
+        &__wrapper:hover {
+            transform: scale(1.1);
+        }
+    }
+}

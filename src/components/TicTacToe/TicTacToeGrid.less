@@ -34,6 +34,7 @@
 
         user-select: none;
         border: 2px solid #17252A;
+        background-color: #FFFFFF;
 
         img {
             pointer-events: none;
@@ -44,35 +45,35 @@
 
     /* ******************************************** PRETTY BORDERS ********************************************* */
     &__row:first-child {
-        div:first-child, div:last-child, div:not(:first-child):not(:last-child) {
+        button:first-child, button:last-child, button:not(:first-child):not(:last-child) {
             border-top: 0;
         }
 
-        div:first-child {
+        button:first-child {
             border-left: 0;
         }
-        div:last-child {
+        button:last-child {
             border-right: 0;
         }
     }
     &__row:not(:first-child):not(:last-child) {
-        div:first-child {
+        button:first-child {
             border-left: 0;
         }
-        div:last-child {
+        button:last-child {
             border-right: 0;
         }
     }
 
     &__row:last-child {
-        div:first-child, div:last-child, div:not(:first-child):not(:last-child) {
+        button:first-child, button:last-child, button:not(:first-child):not(:last-child) {
             border-bottom: 0;
         }
 
-        div:first-child {
+        button:first-child {
             border-left: 0;
         }
-        div:last-child {
+        button:last-child {
             border-right: 0;
         }
     }

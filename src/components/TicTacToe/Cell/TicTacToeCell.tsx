@@ -75,7 +75,7 @@ const TicTacToeCell = ({ ticTacToeCell }: TicTacToeCellProps) => {
     }, [ticTacToeGrid])
 
     return (
-        <div
+        <button
             className="tic-tac-toe-grid__cell"
             onClick={onCellClick}
             onMouseEnter={onMouseEnterImageHover}
@@ -97,7 +97,7 @@ const TicTacToeCell = ({ ticTacToeCell }: TicTacToeCellProps) => {
                     />
                 )
             )}
-        </div>
+        </button>
     )
 }
 
