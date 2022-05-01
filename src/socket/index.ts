@@ -10,9 +10,9 @@ const connectionParams: Partial<ManagerOptions & SocketOptions> = {
 
 const socket = connectionUrl ? io(connectionUrl, connectionParams) : io(connectionParams)
 
-// socket.on('connect_error', () => {
-//     // revert to long polling if not available websocket
-//     socket.io.opts.transports = ['polling', 'websocket']
-// })
+socket.on('connect_error', () => {
+    // revert to long polling if not available websocket
+    socket.io.opts.transports = ['polling', 'websocket']
+})
 
 export default socket
