@@ -4,9 +4,8 @@ const connectionUrl = process.env.SERVER_BASE_URL
 
 // every time start with websocket connection first
 const connectionParams: Partial<ManagerOptions & SocketOptions> = {
-    transports: ['websocket' /*, 'polling'*/],
+    transports: ['websocket', 'polling'],
     autoConnect: false,
-    withCredentials: true,
 }
 
 const socket = connectionUrl ? io(connectionUrl, connectionParams) : io(connectionParams)
