@@ -3,6 +3,7 @@ const Dotenv = require('dotenv-webpack')
 const CopyPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+const MiniCssExtractPlugin = require("mini-css-extract-plugin")
 
 module.exports = (env, arguments) => {
     return {
@@ -68,15 +69,15 @@ module.exports = (env, arguments) => {
                 },
                 {
                     test: /\.less$/i,
-                    use: ['style-loader', 'css-loader', 'less-loader'],
+                    use: [MiniCssExtractPlugin.loader, 'css-loader', 'less-loader'],
                 },
                 {
-                    test: /\.(png|jp(e*)g|svg|gif)$/,
+                    test: /\.(png|jp(e*)g|gif|svg)$/i,
                     use: [
                         {
-                            loader: 'file-loader',
+                            loader: 'url-loader',
                             options: {
-                                name: 'img/[name]-[hash].[ext]',
+                                limit: 8192,
                             },
                         },
                     ],
@@ -96,6 +97,9 @@ module.exports = (env, arguments) => {
         },
         plugins: [
             new HtmlWebpackPlugin({ template: path.join(__dirname, 'public', 'index.html') }),
+            new MiniCssExtractPlugin({
+                filename: 'app.min.css'
+            }),
             new CleanWebpackPlugin(),
             new Dotenv(),
             new CopyPlugin({
