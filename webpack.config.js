@@ -71,12 +71,12 @@ module.exports = (env, arguments) => {
                     use: ['style-loader', 'css-loader', 'less-loader'],
                 },
                 {
-                    test: /\.(png|jp(e*)g|svg|gif)$/,
+                    test: /\.(png|jp(e*)g|gif|svg)$/i,
                     use: [
                         {
-                            loader: 'file-loader',
+                            loader: 'url-loader',
                             options: {
-                                name: 'img/[name]-[hash].[ext]',
+                                limit: 8192,
                             },
                         },
                     ],
