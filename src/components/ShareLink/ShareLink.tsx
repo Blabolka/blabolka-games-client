@@ -3,11 +3,11 @@ import React, { useState } from 'react'
 import copy from 'copy-to-clipboard'
 
 import { Chip } from '@mui/material'
-import { ContentCopy, CheckCircle } from '@mui/icons-material'
-import Snackbar from '@mui/material/Snackbar'
 import Alert from '@mui/material/Alert'
+import Snackbar from '@mui/material/Snackbar'
+import { ContentCopy, CheckCircle } from '@mui/icons-material'
 
-const ShareLinkPanel = () => {
+const ShareLink = () => {
     const [isIconHidden, setIsIconHidden] = useState(true)
     const [isCopied, setIsCopied] = useState(false)
     const [isSnackbarOpen, setIsSnackbarOpen] = useState(false)
@@ -71,4 +71,4 @@ const ShareLinkPanel = () => {
     )
 }
 
-export default ShareLinkPanel
+export default ShareLink

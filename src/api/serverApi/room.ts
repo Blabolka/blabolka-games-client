@@ -1,9 +1,6 @@
-import basicAxios, { AxiosResponse } from 'axios'
+import axios from '@lib/axios'
+import { AxiosResponse } from 'axios'
 import { CreateRoomInfo, RoomInfo, RoomInfoWithParticipants } from '@entityTypes/room'
-
-const serverBaseUrl: string = process.env.SERVER_BASE_URL || ''
-
-const axios = serverBaseUrl ? basicAxios.create({ baseURL: serverBaseUrl }) : basicAxios
 
 export const getRoomById: (roomId: string) => Promise<AxiosResponse<RoomInfoWithParticipants>> = async (
     roomId: string,

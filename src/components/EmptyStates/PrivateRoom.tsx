@@ -1,12 +1,12 @@
 import React, { useRef, useState } from 'react'
 
+import serverApi from '@api/serverApi'
+
+import { LoadingButton } from '@mui/lab'
 import { IconButton, TextField } from '@mui/material'
 import { Visibility, VisibilityOff } from '@mui/icons-material'
-import { LoadingButton } from '@mui/lab'
 
-import { loginRoom } from '@api'
-
-import lockedRoomImage from '@assets/img/private-room-icon.svg'
+import LockedRoomImage from '@assets/img/private-room-icon.svg'
 
 type PrivateRoomProps = {
     roomId: string
@@ -32,7 +32,7 @@ const PrivateRoom = ({ roomId, passwordValidationCallback }: PrivateRoomProps) =
 
     const onEnterPrivateRoomClick = async () => {
         setButtonIsLoading(true)
-        const loginResponse = await loginRoom(roomId, inputPasswordRef.current.value)
+        const loginResponse = await serverApi.loginRoom(roomId, inputPasswordRef.current.value)
 
         setButtonIsLoading(false)
         if (loginResponse.data) {
@@ -45,7 +45,7 @@ const PrivateRoom = ({ roomId, passwordValidationCallback }: PrivateRoomProps) =
     return (
         <div className="center-page">
             <div className="column align-center">
-                <img src={lockedRoomImage} alt="Room is private image" className="empty-state-image" />
+                <img src={LockedRoomImage} alt="Room is private image" className="empty-state-image" />
                 <span className="font-size-20px font-weight-medium">This is a private room</span>
                 <div className="row align-center gap-5px" style={{ marginTop: '10px' }}>
                     <TextField

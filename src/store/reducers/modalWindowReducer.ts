@@ -1,8 +1,9 @@
 import { ModalWindowTypes } from '../types'
-import { ModalWindowProps } from '@entityTypes/modalWindowProps'
+import { ModalWindowProps } from '@entityTypes/modals'
 
 const initialState: ModalWindowProps = {
-    isOpen: false,
+    modalType: '',
+    modalProps: {},
 }
 
 const modalWindowReducer = (state = initialState, action) => {

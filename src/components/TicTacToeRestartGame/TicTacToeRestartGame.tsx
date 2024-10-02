@@ -1,17 +1,17 @@
 import React from 'react'
 import Button from '@mui/material/Button'
 import { useAppSelector, useAppDispatch } from '@hooks'
+import { setRestartGame } from '@redux-actions'
+import { getTicTacToePlayer, getTicTacToeRestart } from '@redux-selectors'
 
-import { setRestartGame } from '@redux-actions/ticTacToeActions'
+import socket from '@lib/socket'
 
 import { TicTacToeActionsEnum } from '@entityTypes/socket'
 
-import socket from '@socket'
-
-const RestartGame = () => {
+const TicTacToeRestartGame = () => {
     const dispatch = useAppDispatch()
-    const player = useAppSelector((state) => state.ticTacToe.player)
-    const restartGame = useAppSelector((state) => state.ticTacToe.restartGame)
+    const player = useAppSelector(getTicTacToePlayer)
+    const restartGame = useAppSelector(getTicTacToeRestart)
 
     const onRestartButtonClick = () => {
         dispatch(setRestartGame({ isOpen: true, isButtonClicked: true, message: 'Waiting for opponent...' }))
@@ -31,4 +31,4 @@ const RestartGame = () => {
     )
 }
 
-export default RestartGame
+export default TicTacToeRestartGame

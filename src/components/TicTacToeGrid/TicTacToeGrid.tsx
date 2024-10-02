@@ -1,11 +1,13 @@
 import React from 'react'
-import TicTacToeRow from './Row/TicTacToeRow'
 import { useAppSelector } from '@hooks'
+import { getTicTacToeGrid } from '@redux-selectors'
+
+import TicTacToeRow from './Row/TicTacToeRow'
 
 import './TicTacToeGrid.less'
 
 const TicTacToeGrid = () => {
-    const ticTacToeGrid = useAppSelector((state) => state.ticTacToe.ticTacToeGrid)
+    const ticTacToeGrid = useAppSelector(getTicTacToeGrid)
 
     return (
         <div className="tic-tac-toe-grid__wrapper">

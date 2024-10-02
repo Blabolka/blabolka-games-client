@@ -1,28 +1,33 @@
 import React, { useState, useEffect } from 'react'
 import { useAppSelector, useAppDispatch } from '@hooks'
-import { setIsGridDisabled, setTicTacToeCell, setRestartGame } from '@redux-actions/ticTacToeActions'
-
+import { setIsGridDisabled, setTicTacToeCell, setRestartGame } from '@redux-actions'
+import {
+    getTicTacToeGrid,
+    getTicTacToePlayer,
+    getTicTacToeIsGridDisabled,
+    getTicTacToeValuesInRowToFinish,
+} from '@redux-selectors'
 import { CellFullData, CellValuesEnum } from '@entityTypes/ticTacToe'
 import { TicTacToeFinishGameChecker } from '@services/ticTacToe/TicTacToeFinishGameChecker'
 
-import closeIcon from '@assets/img/close-icon.svg'
-import circleIcon from '@assets/img/circle-icon.svg'
+import socket from '@lib/socket'
+
+import CloseIcon from '@assets/img/close-icon.svg'
+import CircleIcon from '@assets/img/circle-icon.svg'
 
 type TicTacToeCellProps = {
     ticTacToeCell: CellFullData
 }
-
-import socket from '@socket'
 
 import { TicTacToeActionsEnum } from '@entityTypes/socket'
 
 const TicTacToeCell = ({ ticTacToeCell }: TicTacToeCellProps) => {
     const [isCellOnHover, setIsCellOnHover] = useState(false)
 
-    const player = useAppSelector((state) => state.ticTacToe.player)
-    const ticTacToeGrid = useAppSelector((state) => state.ticTacToe.ticTacToeGrid)
-    const valuesInRowToFinish = useAppSelector((state) => state.ticTacToe.valuesInRowToFinish)
-    const isGridDisabled = useAppSelector((state) => state.ticTacToe.isGridDisabled)
+    const player = useAppSelector(getTicTacToePlayer)
+    const ticTacToeGrid = useAppSelector(getTicTacToeGrid)
+    const isGridDisabled = useAppSelector(getTicTacToeIsGridDisabled)
+    const valuesInRowToFinish = useAppSelector(getTicTacToeValuesInRowToFinish)
 
     const dispatch = useAppDispatch()
 
@@ -83,7 +88,7 @@ const TicTacToeCell = ({ ticTacToeCell }: TicTacToeCellProps) => {
         >
             {ticTacToeCell.cellData.isClicked ? (
                 <img
-                    src={ticTacToeCell.cellData.value === CellValuesEnum.X ? closeIcon : circleIcon}
+                    src={ticTacToeCell.cellData.value === CellValuesEnum.X ? CloseIcon : CircleIcon}
                     alt={`Tic-Tac-Toe Icon`}
                     draggable={false}
                 />
@@ -91,7 +96,7 @@ const TicTacToeCell = ({ ticTacToeCell }: TicTacToeCellProps) => {
                 isCellOnHover && (
                     <img
                         style={{ opacity: '0.2' }}
-                        src={player.value === CellValuesEnum.X ? closeIcon : circleIcon}
+                        src={player.value === CellValuesEnum.X ? CloseIcon : CircleIcon}
                         alt={`Tic-Tac-Toe Hover Icon`}
                         draggable={false}
                     />

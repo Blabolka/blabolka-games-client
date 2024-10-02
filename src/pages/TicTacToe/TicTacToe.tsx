@@ -1,55 +1,52 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-
 import { useAppDispatch, useAppSelector } from '@hooks'
 import {
-    setIsGridDisabled,
-    setRestartGame,
     setTicTacToe,
-    setTicTacToeCell,
+    setRestartGame,
     setTicTacToeGrid,
+    setTicTacToeCell,
+    setIsGridDisabled,
     setTicTacToePlayer,
     setValuesInRowToFinish,
-} from '@redux-actions/ticTacToeActions'
+} from '@redux-actions'
+import { getTicTacToeRestartIsOpen } from '@redux-selectors'
 
-import { getRoomById } from '@api'
+import socket from '@lib/socket'
+import serverApi from '@api/serverApi'
 
-import { getGridSizeByGridSizeKey, getTicTacToeArray, getTicTacToeInitialState } from '@utils/ticTacToe'
-
-import GameInfoPanel from '@components/GameInfoPanel'
-import TicTacToeGrid from '@components/TicTacToe/TicTacToeGrid'
-import FullRoom from '@components/EmptyStates/FullRoom'
-import PrivateRoom from '@components/EmptyStates/PrivateRoom'
-import RestartGame from '@components/InfoPanelComponents/RestartGame'
-import ShareLinkPanel from '@components/InfoPanelComponents/ShareLinkPanel'
-import WaitForPlayers from '@components/InfoPanelComponents/WaitForPlayers'
-
-import Loading from '@components/Loading'
 import Snackbar from '@mui/material/Snackbar'
+import FullRoom from '@components/EmptyStates/FullRoom'
+import ShareLink from '@components/ShareLink/ShareLink'
+import PageLoading from '@components/PageLoading/PageLoading'
+import PrivateRoom from '@components/EmptyStates/PrivateRoom'
+import TicTacToeGrid from '@components/TicTacToeGrid/TicTacToeGrid'
+import WaitForPlayers from '@components/WaitingForPlayers/WaitForPlayers'
+import TicTacToeRestartGame from '@components/TicTacToeRestartGame/TicTacToeRestartGame'
 
-import { RoomTypesEnum, TicTacToeRoomParams } from '@entityTypes/room'
 import { TicTacToeActionsEnum } from '@entityTypes/socket'
-import { TicTacToeGridSize, TicTacToeGridSizeKeysEnum } from '@entityTypes/ticTacToe'
 import { TicTacToePlayer } from '@entityTypes/ticTacToePlayer'
-
-import socket from '@socket'
+import { RoomTypesEnum, TicTacToeRoomParams } from '@entityTypes/room'
+import { TicTacToeGridSize, TicTacToeGridSizeKeysEnum } from '@entityTypes/ticTacToe'
+import { getGridSizeByGridSizeKey, getTicTacToeArray, getTicTacToeInitialState } from '@utils/ticTacToe'
 
 const TicTacToe = () => {
     const navigate = useNavigate()
     const dispatch = useAppDispatch()
-    const { roomId } = useParams()
+
+    const isOpenRestartGame = useAppSelector(getTicTacToeRestartIsOpen)
+
+    const [isLoading, setIsLoading] = useState(true)
+    const [isRoomFull, setIsRoomFull] = useState(false)
+    const [isRoomPrivate, setIsRoomPrivate] = useState(false)
+    const [isWaitingForPlayers, setIsWaitingForPlayers] = useState(false)
+    const [snackBar, setSnackBar] = useState({ open: false, message: '' })
     const [ticTacToeRoomInfo, setTicTacToeRoomInfo] = useState<TicTacToeRoomParams>({
         gridSize: TicTacToeGridSizeKeysEnum.THREE_BY_THREE,
         valuesInRowToFinish: 3,
     })
 
-    const [isLoading, setIsLoading] = useState(true)
-    const isOpenRestartGame = useAppSelector((state) => state.ticTacToe.restartGame.isOpen)
-    const [isWaitingForPlayers, setIsWaitingForPlayers] = useState(false)
-
-    const [isRoomFull, setIsRoomFull] = useState(false)
-    const [isRoomPrivate, setIsRoomPrivate] = useState(false)
-    const [snackBar, setSnackBar] = useState({ open: false, message: '' })
+    const { roomId } = useParams()
 
     const initSocketListeners = (roomInfo: TicTacToeRoomParams) => {
         socket.connect()
@@ -113,7 +110,7 @@ const TicTacToe = () => {
 
     useEffect(() => {
         const fetchRoomData = async () => {
-            const roomResponse = await getRoomById(roomId || '')
+            const roomResponse = await serverApi.getRoomById(roomId || '')
 
             if (roomResponse.data) {
                 setTicTacToeRoomInfo(roomResponse.data.roomInfo)
@@ -149,23 +146,23 @@ const TicTacToe = () => {
     return (
         <>
             {isLoading ? (
-                <Loading />
+                <PageLoading />
             ) : isRoomPrivate ? (
                 <PrivateRoom roomId={roomId || ''} passwordValidationCallback={onPasswordValidationCallback} />
             ) : isRoomFull ? (
                 <FullRoom />
             ) : (
                 <div className="center-page">
-                    <GameInfoPanel styles={{ height: '70px' }}>
-                        {isWaitingForPlayers && <ShareLinkPanel />}
-                        {isOpenRestartGame && <RestartGame />}
-                    </GameInfoPanel>
+                    <div className="row align-center justify-center" style={{ height: '70px' }}>
+                        {isWaitingForPlayers && <ShareLink />}
+                        {isOpenRestartGame && <TicTacToeRestartGame />}
+                    </div>
 
                     <TicTacToeGrid />
 
-                    <GameInfoPanel styles={{ height: '40px' }}>
+                    <div className="row align-center justify-center" style={{ height: '40px' }}>
                         {isWaitingForPlayers && <WaitForPlayers />}
-                    </GameInfoPanel>
+                    </div>
                 </div>
             )}
 

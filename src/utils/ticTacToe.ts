@@ -1,9 +1,9 @@
 import {
     CellProps,
     CellFullData,
-    TicTacToeGridSizeKeysEnum,
-    TicTacToeGridSize,
     InitialStateType,
+    TicTacToeGridSize,
+    TicTacToeGridSizeKeysEnum,
 } from '@entityTypes/ticTacToe'
 
 export const getTicTacToeInitialState = (): InitialStateType => {

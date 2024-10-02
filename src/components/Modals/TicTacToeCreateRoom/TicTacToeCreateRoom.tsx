@@ -1,16 +1,15 @@
 import React, { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAppDispatch, useAppSelector } from '@hooks'
-import { setModalWindow } from '@redux-actions/modalWindowActions'
 
-import { TicTacToeGridSizeKeysEnum } from '@entityTypes/ticTacToe'
+import serverApi from '@api/serverApi'
+
+import { ModalBasicProps } from '@entityTypes/modals'
 import { CreateRoomInfo, RoomTypesEnum } from '@entityTypes/room'
+import { TicTacToeGridSizeKeysEnum } from '@entityTypes/ticTacToe'
 import { getValuesInRowToFinishByGridSizeKey } from '@utils/ticTacToe'
 
-import { createRoom as createRoomRequest } from '@api'
-
-import './TicTacToeCreateRoomModal.less'
-
+import LoadingButton from '@mui/lab/LoadingButton'
+import { Visibility, VisibilityOff } from '@mui/icons-material'
 import {
     Box,
     Modal,
@@ -24,20 +23,18 @@ import {
     FormControl,
     FormControlLabel,
 } from '@mui/material'
-import LoadingButton from '@mui/lab/LoadingButton'
-import { Visibility, VisibilityOff } from '@mui/icons-material'
 
-const TicTacToeCreateRoomModal = () => {
+import './TicTacToeCreateRoom.less'
+
+const TicTacToeCreateRoom = ({ onClose }: ModalBasicProps) => {
     const navigate = useNavigate()
-    const dispatch = useAppDispatch()
-    const modalWindow = useAppSelector((state) => state.modalWindow)
 
-    const [validation, setValidation] = useState({ isPasswordError: false, passwordErrorMessage: '' })
-    const [buttonIsLoading, setButtonIsLoading] = useState(false)
-    const [gridSizeSelectValue, setGridSizeSelectValue] = useState(TicTacToeGridSizeKeysEnum.THREE_BY_THREE)
+    const inputPasswordRef = useRef({ value: '' })
     const [isPrivate, setIsPrivate] = useState(false)
     const [isShowPassword, setIsShowPassword] = useState(false)
-    const inputPasswordRef = useRef({ value: '' })
+    const [buttonIsLoading, setButtonIsLoading] = useState(false)
+    const [validation, setValidation] = useState({ isPasswordError: false, passwordErrorMessage: '' })
+    const [gridSizeSelectValue, setGridSizeSelectValue] = useState(TicTacToeGridSizeKeysEnum.THREE_BY_THREE)
 
     const onGridSizeSelectChange = (element) => {
         setGridSizeSelectValue(element.target.value)
@@ -62,11 +59,7 @@ const TicTacToeCreateRoomModal = () => {
 
     const onModalClose = () => {
         if (!buttonIsLoading) {
-            dispatch(setModalWindow({ ...modalWindow, isOpen: false }))
-            setGridSizeSelectValue(TicTacToeGridSizeKeysEnum.THREE_BY_THREE)
-            setIsPrivate(false)
-            setIsShowPassword(false)
-            setValidation({ isPasswordError: false, passwordErrorMessage: '' })
+            onClose()
         }
     }
 
@@ -95,7 +88,7 @@ const TicTacToeCreateRoomModal = () => {
     }
 
     const createRoom = async (roomInfo: CreateRoomInfo) => {
-        const roomFullInfo = await createRoomRequest(roomInfo)
+        const roomFullInfo = await serverApi.createRoom(roomInfo)
 
         setButtonIsLoading(false)
         onModalClose()
@@ -104,7 +97,7 @@ const TicTacToeCreateRoomModal = () => {
     }
 
     return (
-        <Modal open={modalWindow.isOpen} onClose={onModalClose}>
+        <Modal open={true} onClose={onModalClose}>
             <div className="modal-window__wrapper">
                 <div className="modal-window">
                     <div className="modal-window__header font-size-20px text-title-color">Tic-Tac-Toe Room</div>
@@ -182,4 +175,4 @@ const TicTacToeCreateRoomModal = () => {
     )
 }
 
-export default TicTacToeCreateRoomModal
+export default TicTacToeCreateRoom
