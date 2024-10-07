@@ -93,7 +93,7 @@ const TicTacToeCreateRoom = ({ onClose }: ModalBasicProps) => {
         setButtonIsLoading(false)
         onModalClose()
 
-        navigate(`/${roomFullInfo.data.roomId}`)
+        navigate(`/tic-tac-toe/${roomFullInfo.data.roomId}`)
     }
 
     return (

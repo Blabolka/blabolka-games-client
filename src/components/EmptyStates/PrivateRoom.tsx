@@ -47,7 +47,7 @@ const PrivateRoom = ({ roomId, passwordValidationCallback }: PrivateRoomProps) =
             <div className="column align-center">
                 <img src={LockedRoomImage} alt="Room is private image" className="empty-state-image" />
                 <span className="font-size-20px font-weight-medium">This is a private room</span>
-                <div className="row align-center gap-5px" style={{ marginTop: '10px' }}>
+                <div className="row align-center gap-4" style={{ marginTop: '10px' }}>
                     <TextField
                         type={isShowPassword ? 'text' : 'password'}
                         label={validation.isPasswordError ? validation.passwordErrorMessage : 'Password'}

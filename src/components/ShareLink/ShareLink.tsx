@@ -36,7 +36,7 @@ const ShareLink = () => {
     return (
         <>
             <div
-                className="column align-center gap-5px"
+                className="column align-center gap-4"
                 onMouseEnter={onCopyLinkMouseEnter}
                 onMouseLeave={onCopyLinkMouseLeave}
             >
