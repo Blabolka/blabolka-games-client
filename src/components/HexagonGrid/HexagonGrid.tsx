@@ -1,35 +1,25 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 
-import { Grid, Hex } from 'honeycomb-grid'
-import Hexagon, { HexagonProps } from '@components/Hexagon/Hexagon'
-
-export type HexagonGridProps = {
-    grid: Grid<Hex> | undefined
-    hexProps?: Partial<HexagonProps>
+type AdditionalHexagonalGridProps = {
+    width?: number
+    height?: number
 }
 
-const HexagonGrid = ({ grid, hexProps }: HexagonGridProps) => {
-    const [hexes, setHexes] = useState<Hex[]>([])
+export type HexagonGridProps = AdditionalHexagonalGridProps & React.SVGProps<SVGSVGElement>
 
-    useEffect(() => {
-        setHexes(grid?.toArray() || [])
-    }, [grid])
-
+const HexagonGrid = ({ width, height, children, ...props }: HexagonGridProps) => {
     return (
-        <div style={{ position: 'relative', height: grid?.pixelHeight, width: grid?.pixelWidth }}>
-            {hexes.map((hex, index) => (
-                <div
-                    key={index}
-                    className="row"
-                    style={{
-                        position: 'absolute',
-                        transform: `translate(${hex.x}px, ${hex.y}px)`,
-                    }}
-                >
-                    <Hexagon hex={hex} {...hexProps} />
-                </div>
-            ))}
-        </div>
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            version="1.1"
+            width={width}
+            height={height}
+            overflow="visible"
+            {...(width && height ? { viewBox: `0 0 ${width} ${height}` } : {})}
+            {...props}
+        >
+            {children}
+        </svg>
     )
 }
 
