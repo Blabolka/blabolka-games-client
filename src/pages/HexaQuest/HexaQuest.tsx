@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 
 import classnames from 'classnames'
 
+import Button from '@mui/material/Button'
 import Hexagon from '@components/Hexagon/Hexagon'
 import HexagonPath from '@components/HexagonPath/HexagonPath'
 import HexagonGrid from '@components/HexagonGrid/HexagonGrid'
@@ -22,12 +23,31 @@ const HexaQuest = () => {
         currentPlayer: undefined,
     })
 
+    const onPlayerFinishMove = () => {
+        const currentPlayerIndex = playersGameState.players.findIndex((player) => {
+            return (
+                playersGameState.currentPlayer?.coordinates?.q === player.coordinates.q &&
+                playersGameState.currentPlayer?.coordinates?.r === player.coordinates.r
+            )
+        })
+        setPlayersGameState({
+            ...playersGameState,
+            currentPlayer: playersGameState.players[currentPlayerIndex + 1] || playersGameState.players[0],
+        })
+    }
+
     useEffect(() => {
         const { grid, players } = getInitialGameConfig()
 
         setGrid(grid)
-        setPlayersGameState({ players, currentPlayer: players[1] })
+        setPlayersGameState({ players, currentPlayer: players[0] })
     }, [])
+
+    useEffect(() => {
+        if (!playersGameState?.currentPlayer) return
+
+        setPlayerMoveState(getInitialPlayerMoveState())
+    }, [playersGameState.currentPlayer])
 
     useEffect(() => {
         if (!grid || !hoveredHex || !playersGameState?.currentPlayer) {
@@ -43,12 +63,20 @@ const HexaQuest = () => {
         const goalHexagon = hoveredHex
 
         if (startHexagon && goalHexagon) {
-            setPlayerMoveState({ path: hexagonPathfinding.aStar(grid, startHexagon, goalHexagon) || [] })
+            setPlayerMoveState((state) => ({
+                ...state,
+                path: hexagonPathfinding.aStar(grid, startHexagon, goalHexagon) || [],
+            }))
         }
     }, [playersGameState, hoveredHex])
 
     return (
-        <div className="center-page justify-start">
+        <div className="center-page justify-start" style={{ position: 'relative' }}>
+            <div className="column hexa-quest__gui" style={{ position: 'absolute', top: '24px', right: '8px' }}>
+                <Button variant="contained" color="inherit" size="small" onClick={onPlayerFinishMove}>
+                    Finish move
+                </Button>
+            </div>
             <div className="column align-center">
                 <HexagonGrid
                     width={grid?.pixelWidth}
