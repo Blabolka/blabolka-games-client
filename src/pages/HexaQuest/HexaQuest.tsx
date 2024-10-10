@@ -13,9 +13,9 @@ import { GamePlayerMoveState, GamePlayersState, Hex, HexType, PlayerConfigItem, 
 import {
     sumPathMoveCost,
     getInitialGameConfig,
-    updateGridWithMoveCosts,
     getAvailableHexesToMove,
     getInitialPlayerMoveState,
+    getGridWithUpdatedMoveCosts,
 } from './hexaQuestHelpers'
 
 import './HexaQuest.less'
@@ -123,15 +123,15 @@ const HexaQuest = () => {
             return resetPath()
         }
 
-        updateGridWithMoveCosts(grid, currentPlayer.config.type)
+        const updatedGrid = getGridWithUpdatedMoveCosts(grid, currentPlayer.config.type)
 
-        const startHexagon = grid.getHex({ q: currentPlayer.coordinates.q, r: currentPlayer.coordinates.r })
-        const goalHexagon = hoveredHex
+        const startHexagon = updatedGrid.getHex({ q: currentPlayer.coordinates.q, r: currentPlayer.coordinates.r })
+        const goalHexagon = updatedGrid.getHex({ q: hoveredHex.q, r: hoveredHex.r })
 
         if (startHexagon && goalHexagon) {
             setPlayerMoveState((state) => ({
                 ...state,
-                path: hexagonPathfinding.aStar(grid, startHexagon, goalHexagon) || [],
+                path: hexagonPathfinding.aStar(updatedGrid, startHexagon, goalHexagon) || [],
             }))
         }
     }, [currentPlayer, playerMoveState.availableHexesToMove, hoveredHex])
@@ -139,7 +139,7 @@ const HexaQuest = () => {
     return (
         <div className="center-page justify-start" style={{ position: 'relative' }}>
             <div className="column gap-4 hexa-quest__gui" style={{ position: 'absolute', top: '24px', right: '8px' }}>
-                <span>Remaining move cost: {currentPlayer?.config?.remainingMoveCost}</span>
+                <span>Remaining moves: {currentPlayer?.config?.remainingMoveCost}</span>
                 <Button variant="contained" color="inherit" size="small" onClick={onPlayerFinishMove}>
                     Finish move
                 </Button>

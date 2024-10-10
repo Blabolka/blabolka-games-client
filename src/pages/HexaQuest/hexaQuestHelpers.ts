@@ -1,14 +1,14 @@
 import { defineHex, Grid, rectangle, spiral } from 'honeycomb-grid'
 import hexagonPathfinding from '@services/hexagon/hexagonPathfinding'
 import {
-    Hex,
-    HexType,
-    TeamType,
-    HexConfig,
-    PlayerType,
-    HexesConfigItem,
-    PlayerConfigItem,
     GamePlayerMoveState,
+    Hex,
+    HexConfig,
+    HexesConfigItem,
+    HexType,
+    PlayerConfigItem,
+    PlayerType,
+    TeamType,
 } from '@entityTypes/hexaQuest'
 
 const MOVE_COST_BY_PLAYER_AND_HEX_TYPE = {
@@ -76,25 +76,26 @@ export const sumPathMoveCost = (path?: Hex[]) => {
     return trimmedPath.reduce((memo, hex) => memo + (hex?.config?.moveCost || 0), 0) || Infinity
 }
 
-// TODO rewrite to return new grid
-export const updateGridWithMoveCosts = (grid: Grid<Hex>, playerType: PlayerType) => {
-    grid.forEach((hex: Hex) => {
-        hex.config = {
+export const getGridWithUpdatedMoveCosts = (grid: Grid<Hex>, playerType: PlayerType) => {
+    return grid.map((hex) => {
+        const newHex = hex.clone() as Hex
+        newHex.config = {
             ...hex.config,
             moveCost: getMoveCostByPlayerAndType(playerType, hex.config?.type),
         }
+
+        return newHex
     })
 }
 
 export const getAvailableHexesToMove = (grid: Grid<Hex>, player?: PlayerConfigItem) => {
     if (!player) return []
 
-    const startHexagon = grid.getHex({ q: player.coordinates.q, r: player.coordinates.r })
+    const updatedGrid = getGridWithUpdatedMoveCosts(grid, player.config.type)
+    const startHexagon = updatedGrid.getHex({ q: player.coordinates.q, r: player.coordinates.r })
     if (!startHexagon) return []
 
-    updateGridWithMoveCosts(grid, player.config.type)
-
-    const availableHexes = grid
+    const availableHexes = updatedGrid
         .traverse(
             spiral({
                 radius: player.config.numberOfMoveCostPerTurn,
@@ -104,7 +105,7 @@ export const getAvailableHexesToMove = (grid: Grid<Hex>, player?: PlayerConfigIt
         .toArray()
 
     return availableHexes.filter((hex) => {
-        const pathToHex = hexagonPathfinding.aStar(grid, startHexagon, hex)
+        const pathToHex = hexagonPathfinding.aStar(updatedGrid, startHexagon, hex)
         const moveCostsSum = sumPathMoveCost(pathToHex)
 
         return moveCostsSum <= player.config.remainingMoveCost
