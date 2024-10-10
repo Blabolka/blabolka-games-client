@@ -1,4 +1,16 @@
 .hexagon {
+    &__water {
+        fill: lightskyblue;
+    }
+
+    &__forest {
+        fill: forestgreen;
+    }
+
+    &__impassable {
+        fill: black;
+    }
+
     &__player--friend {
         fill: lightgreen;
     }
@@ -10,17 +22,12 @@
     &__current-player {
         fill: mediumpurple;
     }
+}
 
-    &__water {
-        fill: lightskyblue;
-    }
-
-    &__forest {
-        fill: forestgreen;
-    }
-
-    &__impassable {
-        fill: black;
+.hexagon-grid:hover {
+    & .hexagon__inaccessible {
+        stroke: red;
+        stroke-width: 3px;
     }
 }
 

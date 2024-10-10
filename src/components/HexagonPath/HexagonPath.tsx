@@ -17,6 +17,7 @@ const HexagonPath = ({ hexes, ...props }: HexagonPathProps) => {
             strokeWidth="5"
             strokeLinecap="round"
             strokeLinejoin="round"
+            pointerEvents="none"
             {...props}
         />
     )

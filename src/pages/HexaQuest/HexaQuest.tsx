@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 
 import classnames from 'classnames'
 
@@ -9,8 +9,14 @@ import HexagonGrid from '@components/HexagonGrid/HexagonGrid'
 
 import { Grid } from 'honeycomb-grid'
 import hexagonPathfinding from '@services/hexagon/hexagonPathfinding'
-import { GamePlayerMoveState, GamePlayersState, Hex, HexType, TeamType } from '@entityTypes/hexaQuest'
-import { getInitialGameConfig, getInitialPlayerMoveState, updateGridWithMoveCosts } from './hexaQuestHelpers'
+import { GamePlayerMoveState, GamePlayersState, Hex, HexType, PlayerConfigItem, TeamType } from '@entityTypes/hexaQuest'
+import {
+    sumPathMoveCost,
+    getInitialGameConfig,
+    updateGridWithMoveCosts,
+    getAvailableHexesToMove,
+    getInitialPlayerMoveState,
+} from './hexaQuestHelpers'
 
 import './HexaQuest.less'
 
@@ -20,19 +26,68 @@ const HexaQuest = () => {
     const [playerMoveState, setPlayerMoveState] = useState<GamePlayerMoveState>(getInitialPlayerMoveState())
     const [playersGameState, setPlayersGameState] = useState<GamePlayersState>({
         players: [],
-        currentPlayer: undefined,
+        currentPlayerCoordinates: undefined,
     })
+
+    const currentPlayer = useMemo(
+        (): PlayerConfigItem | undefined =>
+            playersGameState.players.find(
+                (player) =>
+                    player.coordinates.q === playersGameState.currentPlayerCoordinates?.q &&
+                    player.coordinates.r === playersGameState.currentPlayerCoordinates?.r,
+            ),
+        [playersGameState.players, playersGameState.currentPlayerCoordinates],
+    )
+
+    const onPlayerMove = (hex: Hex) => {
+        if (!playerMoveState.path.length) return
+
+        const newPlayerCoordinates = { q: hex.q, r: hex.r }
+        const pathCost = sumPathMoveCost(playerMoveState.path)
+
+        setPlayersGameState({
+            ...playersGameState,
+            currentPlayerCoordinates: newPlayerCoordinates,
+            players: playersGameState.players.map((player) =>
+                player.coordinates.q === playersGameState.currentPlayerCoordinates?.q &&
+                player.coordinates.r === playersGameState.currentPlayerCoordinates?.r
+                    ? {
+                          ...player,
+                          coordinates: newPlayerCoordinates,
+                          config: {
+                              ...player.config,
+                              remainingMoveCost: player.config.remainingMoveCost - pathCost,
+                          },
+                      }
+                    : player,
+            ),
+        })
+    }
 
     const onPlayerFinishMove = () => {
         const currentPlayerIndex = playersGameState.players.findIndex((player) => {
             return (
-                playersGameState.currentPlayer?.coordinates?.q === player.coordinates.q &&
-                playersGameState.currentPlayer?.coordinates?.r === player.coordinates.r
+                currentPlayer?.coordinates?.q === player.coordinates.q &&
+                currentPlayer?.coordinates?.r === player.coordinates.r
             )
         })
+
         setPlayersGameState({
             ...playersGameState,
-            currentPlayer: playersGameState.players[currentPlayerIndex + 1] || playersGameState.players[0],
+            currentPlayerCoordinates: (playersGameState.players[currentPlayerIndex + 1] || playersGameState.players[0])
+                .coordinates,
+            players: playersGameState.players.map((player) =>
+                player.coordinates.q === playersGameState.currentPlayerCoordinates?.q &&
+                player.coordinates.r === playersGameState.currentPlayerCoordinates?.r
+                    ? {
+                          ...player,
+                          config: {
+                              ...player.config,
+                              remainingMoveCost: player.config.numberOfMoveCostPerTurn,
+                          },
+                      }
+                    : player,
+            ),
         })
     }
 
@@ -40,22 +95,33 @@ const HexaQuest = () => {
         const { grid, players } = getInitialGameConfig()
 
         setGrid(grid)
-        setPlayersGameState({ players, currentPlayer: players[0] })
+        setPlayersGameState({ players, currentPlayerCoordinates: players[0].coordinates })
     }, [])
 
     useEffect(() => {
-        if (!playersGameState?.currentPlayer) return
+        if (!grid || !currentPlayer) return
 
-        setPlayerMoveState(getInitialPlayerMoveState())
-    }, [playersGameState.currentPlayer])
+        setPlayerMoveState((state) => ({
+            ...state,
+            availableHexesToMove: getAvailableHexesToMove(grid, currentPlayer),
+        }))
+    }, [currentPlayer])
 
     useEffect(() => {
-        if (!grid || !hoveredHex || !playersGameState?.currentPlayer) {
-            setPlayerMoveState(getInitialPlayerMoveState())
-            return
+        const resetPath = () => {
+            setPlayerMoveState((state) => ({ ...state, path: [] }))
         }
 
-        const currentPlayer = playersGameState.currentPlayer
+        if (!grid || !hoveredHex || !currentPlayer) {
+            return resetPath()
+        }
+
+        const isHexAccessibleByPlayer = playerMoveState.availableHexesToMove.some(
+            (availableHex) => availableHex.q === hoveredHex.q && availableHex.r === hoveredHex.r,
+        )
+        if (!isHexAccessibleByPlayer) {
+            return resetPath()
+        }
 
         updateGridWithMoveCosts(grid, currentPlayer.config.type)
 
@@ -68,17 +134,19 @@ const HexaQuest = () => {
                 path: hexagonPathfinding.aStar(grid, startHexagon, goalHexagon) || [],
             }))
         }
-    }, [playersGameState, hoveredHex])
+    }, [currentPlayer, playerMoveState.availableHexesToMove, hoveredHex])
 
     return (
         <div className="center-page justify-start" style={{ position: 'relative' }}>
-            <div className="column hexa-quest__gui" style={{ position: 'absolute', top: '24px', right: '8px' }}>
+            <div className="column gap-4 hexa-quest__gui" style={{ position: 'absolute', top: '24px', right: '8px' }}>
+                <span>Remaining move cost: {currentPlayer?.config?.remainingMoveCost}</span>
                 <Button variant="contained" color="inherit" size="small" onClick={onPlayerFinishMove}>
                     Finish move
                 </Button>
             </div>
             <div className="column align-center">
                 <HexagonGrid
+                    className="hexagon-grid"
                     width={grid?.pixelWidth}
                     height={grid?.pixelHeight}
                     onMouseLeave={() => setHoveredHex(undefined)}
@@ -89,21 +157,27 @@ const HexaQuest = () => {
                         })
 
                         const isCurrentPlayer =
-                            currentHexPlayer?.coordinates?.q === playersGameState.currentPlayer?.coordinates?.q &&
-                            currentHexPlayer?.coordinates?.r === playersGameState.currentPlayer?.coordinates?.r
+                            currentHexPlayer?.coordinates?.q === currentPlayer?.coordinates?.q &&
+                            currentHexPlayer?.coordinates?.r === currentPlayer?.coordinates?.r
+
+                        const isHexAccessibleByPlayer = playerMoveState.availableHexesToMove.some(
+                            (availableHex) => availableHex.q === hex.q && availableHex.r === hex.r,
+                        )
 
                         return (
                             <Hexagon
                                 key={index}
                                 hex={hex}
+                                onClick={() => onPlayerMove(hex)}
                                 onMouseEnter={() => setHoveredHex(hex)}
                                 className={classnames({
+                                    'hexagon__current-player': isCurrentPlayer,
+                                    'hexagon__player--enemy': currentHexPlayer?.config?.team === TeamType.ENEMY,
+                                    'hexagon__player--friend': currentHexPlayer?.config?.team === TeamType.FRIEND,
+                                    hexagon__inaccessible: !isHexAccessibleByPlayer,
                                     hexagon__water: hex?.config?.type === HexType.WATER,
                                     hexagon__forest: hex?.config?.type === HexType.FOREST,
                                     hexagon__impassable: hex?.config?.type === HexType.IMPASSABLE,
-                                    'hexagon__player--enemy': currentHexPlayer?.config?.team === TeamType.ENEMY,
-                                    'hexagon__player--friend': currentHexPlayer?.config?.team === TeamType.FRIEND,
-                                    'hexagon__current-player': isCurrentPlayer,
                                 })}
                             />
                         )

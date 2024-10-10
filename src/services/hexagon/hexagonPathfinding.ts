@@ -1,4 +1,4 @@
-import { Hex } from '@entityTypes/hexagon'
+import { Hex } from '@entityTypes/hexaQuest'
 import { Grid, ring } from 'honeycomb-grid'
 import { aStar as aStarAbstract } from 'abstract-astar'
 
