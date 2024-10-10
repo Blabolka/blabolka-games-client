@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import classnames from 'classnames'
 
@@ -7,33 +7,45 @@ import HexagonPath from '@components/HexagonPath/HexagonPath'
 import HexagonGrid from '@components/HexagonGrid/HexagonGrid'
 
 import { Grid } from 'honeycomb-grid'
-import { Hex, HexType } from '@entityTypes/hexaQuest'
-import { getInitialGridConfig } from './hexaQuestHelpers'
 import hexagonPathfinding from '@services/hexagon/hexagonPathfinding'
+import { GamePlayerMoveState, GamePlayersState, Hex, HexType, TeamType } from '@entityTypes/hexaQuest'
+import { getInitialGameConfig, getInitialPlayerMoveState, updateGridWithMoveCosts } from './hexaQuestHelpers'
 
 import './HexaQuest.less'
 
-const HEXAGON_CURRENT_PLAYER = { q: 2, r: 2 }
-
 const HexaQuest = () => {
-    const [shortestPath, setShortestPath] = useState<Hex[]>([])
+    const [grid, setGrid] = useState<Grid<Hex>>()
     const [hoveredHex, setHoveredHex] = useState<Hex | undefined>()
-
-    const grid: Grid<Hex> = useMemo(() => getInitialGridConfig(), [])
+    const [playerMoveState, setPlayerMoveState] = useState<GamePlayerMoveState>(getInitialPlayerMoveState())
+    const [playersGameState, setPlayersGameState] = useState<GamePlayersState>({
+        players: [],
+        currentPlayer: undefined,
+    })
 
     useEffect(() => {
-        if (!grid || !hoveredHex) {
-            setShortestPath([])
+        const { grid, players } = getInitialGameConfig()
+
+        setGrid(grid)
+        setPlayersGameState({ players, currentPlayer: players[1] })
+    }, [])
+
+    useEffect(() => {
+        if (!grid || !hoveredHex || !playersGameState?.currentPlayer) {
+            setPlayerMoveState(getInitialPlayerMoveState())
             return
         }
 
-        const startHexagon = grid.getHex({ q: HEXAGON_CURRENT_PLAYER.q, r: HEXAGON_CURRENT_PLAYER.r })
+        const currentPlayer = playersGameState.currentPlayer
+
+        updateGridWithMoveCosts(grid, currentPlayer.config.type)
+
+        const startHexagon = grid.getHex({ q: currentPlayer.coordinates.q, r: currentPlayer.coordinates.r })
         const goalHexagon = hoveredHex
 
         if (startHexagon && goalHexagon) {
-            setShortestPath(hexagonPathfinding.aStar(grid, startHexagon, goalHexagon) || [])
+            setPlayerMoveState({ path: hexagonPathfinding.aStar(grid, startHexagon, goalHexagon) || [] })
         }
-    }, [hoveredHex])
+    }, [playersGameState, hoveredHex])
 
     return (
         <div className="center-page justify-start">
@@ -44,6 +56,14 @@ const HexaQuest = () => {
                     onMouseLeave={() => setHoveredHex(undefined)}
                 >
                     {grid?.toArray()?.map((hex, index) => {
+                        const currentHexPlayer = playersGameState.players.find((player) => {
+                            return hex.q === player.coordinates.q && hex.r === player.coordinates.r
+                        })
+
+                        const isCurrentPlayer =
+                            currentHexPlayer?.coordinates?.q === playersGameState.currentPlayer?.coordinates?.q &&
+                            currentHexPlayer?.coordinates?.r === playersGameState.currentPlayer?.coordinates?.r
+
                         return (
                             <Hexagon
                                 key={index}
@@ -53,13 +73,14 @@ const HexaQuest = () => {
                                     hexagon__water: hex?.config?.type === HexType.WATER,
                                     hexagon__forest: hex?.config?.type === HexType.FOREST,
                                     hexagon__impassable: hex?.config?.type === HexType.IMPASSABLE,
-                                    hexagon__player:
-                                        hex.q === HEXAGON_CURRENT_PLAYER.q && hex.r === HEXAGON_CURRENT_PLAYER.r,
+                                    'hexagon__player--enemy': currentHexPlayer?.config?.team === TeamType.ENEMY,
+                                    'hexagon__player--friend': currentHexPlayer?.config?.team === TeamType.FRIEND,
+                                    'hexagon__current-player': isCurrentPlayer,
                                 })}
                             />
                         )
                     })}
-                    <HexagonPath hexes={shortestPath} />
+                    <HexagonPath hexes={playerMoveState?.path || []} />
                 </HexagonGrid>
             </div>
         </div>
