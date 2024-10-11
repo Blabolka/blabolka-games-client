@@ -1,7 +1,7 @@
 import React from 'react'
 
-import { PlayerType, TeamType } from '@entityTypes/hexaQuest'
 import { HexagonRendererState } from '../HexagonRenderer'
+import { getPlayerTextByType, getPlayerColorByType } from './hexagonPlayerHelpers'
 
 export type HexagonCharacterProps = {
     rendererState: HexagonRendererState
@@ -9,25 +9,6 @@ export type HexagonCharacterProps = {
 
 const HexagonPlayer = ({ rendererState }: HexagonCharacterProps) => {
     const { hex, player } = rendererState
-
-    const getPlayerTextByType = (playerType: PlayerType) => {
-        switch (playerType) {
-            case PlayerType.WARRIOR: {
-                return 'Warrior'
-            }
-        }
-    }
-
-    const getPlayerColorByType = (teamType: TeamType) => {
-        switch (teamType) {
-            case TeamType.FRIEND: {
-                return 'blue'
-            }
-            case TeamType.ENEMY: {
-                return 'red'
-            }
-        }
-    }
 
     return player ? (
         <text
