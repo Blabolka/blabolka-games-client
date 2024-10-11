@@ -8,6 +8,7 @@ export type Coordinates = {
 // Hex types
 export enum HexType {
     DEFAULT = 'default',
+    BUSH = 'bush',
     FOREST = 'forest',
     WATER = 'water',
     IMPASSABLE = 'impassable',

@@ -1,22 +1,21 @@
 import React from 'react'
 
-import { Hex } from 'honeycomb-grid'
+import { Hex } from '@entityTypes/hexaQuest'
 
-type AdditionalPolygonProps = {
+type AdditionalHexagonProps = {
     hex: Hex
 }
 
-export type HexagonProps = AdditionalPolygonProps & React.SVGProps<SVGPolygonElement>
+export type HexagonProps = AdditionalHexagonProps & React.SVGProps<SVGPolygonElement>
 
 const Hexagon = ({ hex, ...props }: HexagonProps) => {
+    const hexPoints = hex.corners.map(({ x, y }) => `${x},${y}`).join(' ')
+
     return (
-        <polygon
-            points={hex.corners.map(({ x, y }) => `${x},${y}`).join(' ')}
-            fill="#FFFFFF"
-            stroke="#000000"
-            strokeWidth="2"
-            {...props}
-        />
+        <g>
+            <polygon points={hexPoints} fill="#FFFFFF" stroke="#000000" strokeWidth="2" {...props} />
+            {props.children}
+        </g>
     )
 }
 

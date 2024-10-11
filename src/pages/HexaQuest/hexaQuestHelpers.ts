@@ -1,19 +1,20 @@
-import { defineHex, Grid, rectangle, spiral } from 'honeycomb-grid'
+import { defineHex, Grid, Orientation, rectangle, spiral } from 'honeycomb-grid'
 import hexagonPathfinding from '@services/hexagon/hexagonPathfinding'
 import {
-    GamePlayerMoveState,
     Hex,
-    HexConfig,
-    HexesConfigItem,
     HexType,
-    PlayerConfigItem,
-    PlayerType,
     TeamType,
+    HexConfig,
+    PlayerType,
+    HexesConfigItem,
+    PlayerConfigItem,
+    GamePlayerMoveState,
 } from '@entityTypes/hexaQuest'
 
 const MOVE_COST_BY_PLAYER_AND_HEX_TYPE = {
     [PlayerType.WARRIOR]: {
         [HexType.DEFAULT]: 1,
+        [HexType.BUSH]: 1,
         [HexType.FOREST]: 2,
         [HexType.WATER]: 3,
         [HexType.IMPASSABLE]: Infinity,
@@ -29,12 +30,15 @@ const DEFAULT_HEX_CONFIG: HexConfig = {
 }
 
 const HEXES_CONFIG: HexesConfigItem[] = [
-    { coordinates: { q: 1, r: 4 }, config: { type: HexType.FOREST } },
-    { coordinates: { q: 2, r: 4 }, config: { type: HexType.FOREST } },
-    { coordinates: { q: 0, r: 7 }, config: { type: HexType.WATER } },
-    { coordinates: { q: 1, r: 7 }, config: { type: HexType.WATER } },
-    { coordinates: { q: 2, r: 7 }, config: { type: HexType.WATER } },
-    { coordinates: { q: 3, r: 7 }, config: { type: HexType.WATER } },
+    { coordinates: { q: 2, r: 4 }, config: { type: HexType.BUSH } },
+    { coordinates: { q: 5, r: 0 }, config: { type: HexType.FOREST } },
+    { coordinates: { q: 6, r: 3 }, config: { type: HexType.WATER } },
+    { coordinates: { q: 6, r: 0 }, config: { type: HexType.FOREST } },
+    { coordinates: { q: 7, r: -1 }, config: { type: HexType.FOREST } },
+    { coordinates: { q: 7, r: 2 }, config: { type: HexType.WATER } },
+    { coordinates: { q: 8, r: 1 }, config: { type: HexType.WATER } },
+    { coordinates: { q: 9, r: 0 }, config: { type: HexType.WATER } },
+    { coordinates: { q: 11, r: -3 }, config: { type: HexType.BUSH } },
 ]
 
 const PLAYERS_CONFIG: PlayerConfigItem[] = [
@@ -48,7 +52,7 @@ const PLAYERS_CONFIG: PlayerConfigItem[] = [
         },
     },
     {
-        coordinates: { q: 5, r: 9 },
+        coordinates: { q: 15, r: 0 },
         config: {
             type: PlayerType.WARRIOR,
             team: TeamType.ENEMY,
@@ -115,8 +119,8 @@ export const getAvailableHexesToMove = (grid: Grid<Hex>, player?: PlayerConfigIt
 export const getInitialPlayerMoveState = (): GamePlayerMoveState => ({ path: [], availableHexesToMove: [] })
 
 export const getInitialGameConfig = (): { grid: Grid<Hex>; players: PlayerConfigItem[] } => {
-    const Tile = defineHex({ dimensions: 40, origin: 'topLeft' })
-    const grid = new Grid(Tile, rectangle({ width: 10, height: 10 })).forEach((hex: Hex) => {
+    const Tile = defineHex({ dimensions: 40, origin: 'topLeft', orientation: Orientation.FLAT })
+    const grid = new Grid(Tile, rectangle({ width: 16, height: 8 })).forEach((hex: Hex) => {
         hex.config = getConfigByHex(HEXES_CONFIG, hex)
     })
 

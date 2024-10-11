@@ -1,11 +1,11 @@
 import React from 'react'
 
-type AdditionalHexagonalGridProps = {
+type AdditionalHexagonGridProps = {
     width?: number
     height?: number
 }
 
-export type HexagonGridProps = AdditionalHexagonalGridProps & React.SVGProps<SVGSVGElement>
+export type HexagonGridProps = AdditionalHexagonGridProps & React.SVGProps<SVGSVGElement>
 
 const HexagonGrid = ({ width, height, children, ...props }: HexagonGridProps) => {
     return (

@@ -1,15 +1,14 @@
-import React, { useEffect, useState, useMemo } from 'react'
-
-import classnames from 'classnames'
+import React, { useEffect, useMemo, useState } from 'react'
 
 import Button from '@mui/material/Button'
 import Hexagon from '@components/Hexagon/Hexagon'
 import HexagonPath from '@components/HexagonPath/HexagonPath'
 import HexagonGrid from '@components/HexagonGrid/HexagonGrid'
+import HexagonRenderer from '@pages/HexaQuest/HexagonRenderer/HexagonRenderer'
 
 import { Grid } from 'honeycomb-grid'
 import hexagonPathfinding from '@services/hexagon/hexagonPathfinding'
-import { GamePlayerMoveState, GamePlayersState, Hex, HexType, PlayerConfigItem, TeamType } from '@entityTypes/hexaQuest'
+import { GamePlayerMoveState, GamePlayersState, Hex, PlayerConfigItem } from '@entityTypes/hexaQuest'
 import {
     sumPathMoveCost,
     getInitialGameConfig,
@@ -152,34 +151,20 @@ const HexaQuest = () => {
                     onMouseLeave={() => setHoveredHex(undefined)}
                 >
                     {grid?.toArray()?.map((hex, index) => {
-                        const currentHexPlayer = playersGameState.players.find((player) => {
-                            return hex.q === player.coordinates.q && hex.r === player.coordinates.r
-                        })
-
-                        const isCurrentPlayer =
-                            currentHexPlayer?.coordinates?.q === currentPlayer?.coordinates?.q &&
-                            currentHexPlayer?.coordinates?.r === currentPlayer?.coordinates?.r
-
-                        const isHexAccessibleByPlayer = playerMoveState.availableHexesToMove.some(
-                            (availableHex) => availableHex.q === hex.q && availableHex.r === hex.r,
-                        )
-
                         return (
                             <Hexagon
                                 key={index}
                                 hex={hex}
                                 onClick={() => onPlayerMove(hex)}
                                 onMouseEnter={() => setHoveredHex(hex)}
-                                className={classnames({
-                                    'hexagon__current-player': isCurrentPlayer,
-                                    'hexagon__player--enemy': currentHexPlayer?.config?.team === TeamType.ENEMY,
-                                    'hexagon__player--friend': currentHexPlayer?.config?.team === TeamType.FRIEND,
-                                    hexagon__inaccessible: !isHexAccessibleByPlayer,
-                                    hexagon__water: hex?.config?.type === HexType.WATER,
-                                    hexagon__forest: hex?.config?.type === HexType.FOREST,
-                                    hexagon__impassable: hex?.config?.type === HexType.IMPASSABLE,
-                                })}
-                            />
+                            >
+                                <HexagonRenderer
+                                    hex={hex}
+                                    currentPlayer={currentPlayer}
+                                    playerMoveState={playerMoveState}
+                                    playersGameState={playersGameState}
+                                />
+                            </Hexagon>
                         )
                     })}
                     <HexagonPath hexes={playerMoveState?.path || []} />

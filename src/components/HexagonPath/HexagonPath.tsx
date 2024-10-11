@@ -2,11 +2,11 @@ import React from 'react'
 
 import { Hex } from 'honeycomb-grid'
 
-type AdditionalPathProps = {
+type AdditionalHexagonPathProps = {
     hexes: Hex[]
 }
 
-export type HexagonPathProps = AdditionalPathProps & React.SVGProps<SVGPathElement>
+export type HexagonPathProps = AdditionalHexagonPathProps & React.SVGProps<SVGPathElement>
 
 const HexagonPath = ({ hexes, ...props }: HexagonPathProps) => {
     return (
