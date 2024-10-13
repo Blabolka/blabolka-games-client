@@ -7,14 +7,16 @@ import HexagonGrid from '@components/HexagonGrid/HexagonGrid'
 import HexagonRenderer from '@pages/HexaQuest/HexagonRenderer/HexagonRenderer'
 
 import { Grid } from 'honeycomb-grid'
-import hexagonPathfinding from '@services/hexagon/hexagonPathfinding'
-import { GamePlayerMoveState, GamePlayersState, Hex, PlayerConfigItem } from '@entityTypes/hexaQuest'
+import { GamePlayerMoveState, GamePlayersState, Hex, MoveType, PlayerConfigItem } from '@entityTypes/hexaQuest'
 import {
+    getPathToMove,
+    getPathToAttack,
     sumPathMoveCost,
     getInitialGameConfig,
+    getPlayerByCoordinates,
     getAvailableHexesToMove,
     getInitialPlayerMoveState,
-    getGridWithUpdatedMoveCosts,
+    getAvailableHexesToMeleeAttack,
 } from './hexaQuestHelpers'
 
 import './HexaQuest.less'
@@ -30,11 +32,12 @@ const HexaQuest = () => {
 
     const currentPlayer = useMemo(
         (): PlayerConfigItem | undefined =>
-            playersGameState.players.find(
-                (player) =>
-                    player.coordinates.q === playersGameState.currentPlayerCoordinates?.q &&
-                    player.coordinates.r === playersGameState.currentPlayerCoordinates?.r,
-            ),
+            playersGameState.currentPlayerCoordinates
+                ? getPlayerByCoordinates(playersGameState.players, {
+                      q: playersGameState.currentPlayerCoordinates?.q,
+                      r: playersGameState.currentPlayerCoordinates?.r,
+                  })
+                : undefined,
         [playersGameState.players, playersGameState.currentPlayerCoordinates],
     )
 
@@ -63,6 +66,30 @@ const HexaQuest = () => {
         })
     }
 
+    const onPlayerMeleeAttack = () => {}
+
+    const onHexagonClick = (hex: Hex) => {
+        switch (playerMoveState.moveType) {
+            case MoveType.MOVE:
+                onPlayerMove(hex)
+                break
+            case MoveType.MELEE_ATTACK:
+                onPlayerMeleeAttack()
+                break
+        }
+    }
+
+    const onPlayerMeleeAttackStart = () => {
+        setPlayerMoveState((state) => ({
+            ...state,
+            moveType: MoveType.MELEE_ATTACK,
+        }))
+    }
+
+    const onPlayerMeleeAttackCancel = () => {
+        setPlayerMoveState(getInitialPlayerMoveState())
+    }
+
     const onPlayerFinishMove = () => {
         const currentPlayerIndex = playersGameState.players.findIndex((player) => {
             return (
@@ -71,6 +98,7 @@ const HexaQuest = () => {
             )
         })
 
+        setPlayerMoveState(getInitialPlayerMoveState())
         setPlayersGameState({
             ...playersGameState,
             currentPlayerCoordinates: (playersGameState.players[currentPlayerIndex + 1] || playersGameState.players[0])
@@ -102,9 +130,12 @@ const HexaQuest = () => {
 
         setPlayerMoveState((state) => ({
             ...state,
-            availableHexesToMove: getAvailableHexesToMove(grid, currentPlayer),
+            availableHexesToMove:
+                playerMoveState.moveType === MoveType.MOVE
+                    ? getAvailableHexesToMove(grid, playersGameState.players, currentPlayer)
+                    : getAvailableHexesToMeleeAttack(grid, currentPlayer),
         }))
-    }, [currentPlayer])
+    }, [currentPlayer, playerMoveState.moveType, playersGameState.players])
 
     useEffect(() => {
         const resetPath = () => {
@@ -122,23 +153,41 @@ const HexaQuest = () => {
             return resetPath()
         }
 
-        const updatedGrid = getGridWithUpdatedMoveCosts(grid, currentPlayer.config.type)
+        const path =
+            playerMoveState.moveType === MoveType.MOVE
+                ? getPathToMove(grid, currentPlayer, playersGameState.players, hoveredHex)
+                : getPathToAttack(grid, currentPlayer, hoveredHex)
 
-        const startHexagon = updatedGrid.getHex({ q: currentPlayer.coordinates.q, r: currentPlayer.coordinates.r })
-        const goalHexagon = updatedGrid.getHex({ q: hoveredHex.q, r: hoveredHex.r })
-
-        if (startHexagon && goalHexagon) {
-            setPlayerMoveState((state) => ({
-                ...state,
-                path: hexagonPathfinding.aStar(updatedGrid, startHexagon, goalHexagon) || [],
-            }))
-        }
-    }, [currentPlayer, playerMoveState.availableHexesToMove, hoveredHex])
+        setPlayerMoveState((state) => ({
+            ...state,
+            path,
+        }))
+    }, [
+        hoveredHex,
+        currentPlayer,
+        playersGameState.players,
+        playerMoveState.moveType,
+        playerMoveState.availableHexesToMove,
+    ])
 
     return (
         <div className="center-page justify-start" style={{ position: 'relative' }}>
             <div className="column gap-4 hexa-quest__gui" style={{ position: 'absolute', top: '24px', right: '8px' }}>
                 <span>Remaining moves: {currentPlayer?.config?.remainingMoveCost}</span>
+                <div className="row">
+                    <Button
+                        size="small"
+                        color="inherit"
+                        variant={playerMoveState.moveType === MoveType.MELEE_ATTACK ? 'outlined' : 'contained'}
+                        onClick={
+                            playerMoveState.moveType === MoveType.MELEE_ATTACK
+                                ? onPlayerMeleeAttackCancel
+                                : onPlayerMeleeAttackStart
+                        }
+                    >
+                        {playerMoveState.moveType === MoveType.MELEE_ATTACK ? 'Cancel attack' : 'Melee attack'}
+                    </Button>
+                </div>
                 <Button variant="contained" color="inherit" size="small" onClick={onPlayerFinishMove}>
                     Finish move
                 </Button>
@@ -155,7 +204,7 @@ const HexaQuest = () => {
                             <Hexagon
                                 key={index}
                                 hex={hex}
-                                onClick={() => onPlayerMove(hex)}
+                                onClick={() => onHexagonClick(hex)}
                                 onMouseEnter={() => setHoveredHex(hex)}
                             >
                                 <HexagonRenderer

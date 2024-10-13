@@ -42,7 +42,14 @@ export type PlayerConfig = {
 
 export type PlayerConfigItem = { coordinates: Coordinates; config: PlayerConfig }
 
+// Game and move types
+export enum MoveType {
+    MOVE = 'move',
+    MELEE_ATTACK = 'meleeAttack',
+}
+
 export type GamePlayerMoveState = {
+    moveType: MoveType
     path: Hex[]
     availableHexesToMove: Hex[]
 }

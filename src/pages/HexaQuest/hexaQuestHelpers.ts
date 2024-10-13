@@ -1,69 +1,25 @@
 import { defineHex, Grid, Orientation, rectangle, spiral } from 'honeycomb-grid'
 import hexagonPathfinding from '@services/hexagon/hexagonPathfinding'
 import {
+    HEXES_CONFIG,
+    PLAYERS_CONFIG,
+    DEFAULT_HEX_CONFIG,
+    MELEE_ATTACK_RANGE_BY_PLAYER,
+    MOVE_COST_BY_PLAYER_AND_HEX_TYPE,
+} from './hexaQuestContants'
+import {
     Hex,
     HexType,
-    TeamType,
-    HexConfig,
+    MoveType,
     PlayerType,
+    Coordinates,
     HexesConfigItem,
     PlayerConfigItem,
     GamePlayerMoveState,
 } from '@entityTypes/hexaQuest'
 
-const MOVE_COST_BY_PLAYER_AND_HEX_TYPE = {
-    [PlayerType.WARRIOR]: {
-        [HexType.DEFAULT]: 1,
-        [HexType.BUSH]: 1,
-        [HexType.FOREST]: 2,
-        [HexType.WATER]: 3,
-        [HexType.IMPASSABLE]: Infinity,
-    },
-}
-
-const NUMBER_OF_TILES_PER_TURN_BY_PLAYER = {
-    [PlayerType.WARRIOR]: 5,
-}
-
-const DEFAULT_HEX_CONFIG: HexConfig = {
-    type: HexType.DEFAULT,
-}
-
-const HEXES_CONFIG: HexesConfigItem[] = [
-    { coordinates: { q: 2, r: 4 }, config: { type: HexType.BUSH } },
-    { coordinates: { q: 5, r: 0 }, config: { type: HexType.FOREST } },
-    { coordinates: { q: 6, r: 3 }, config: { type: HexType.WATER } },
-    { coordinates: { q: 6, r: 0 }, config: { type: HexType.FOREST } },
-    { coordinates: { q: 7, r: -1 }, config: { type: HexType.FOREST } },
-    { coordinates: { q: 7, r: 2 }, config: { type: HexType.WATER } },
-    { coordinates: { q: 8, r: 1 }, config: { type: HexType.WATER } },
-    { coordinates: { q: 9, r: 0 }, config: { type: HexType.WATER } },
-    { coordinates: { q: 11, r: -3 }, config: { type: HexType.BUSH } },
-]
-
-const PLAYERS_CONFIG: PlayerConfigItem[] = [
-    {
-        coordinates: { q: 0, r: 0 },
-        config: {
-            type: PlayerType.WARRIOR,
-            team: TeamType.FRIEND,
-            numberOfMoveCostPerTurn: NUMBER_OF_TILES_PER_TURN_BY_PLAYER[PlayerType.WARRIOR],
-            remainingMoveCost: NUMBER_OF_TILES_PER_TURN_BY_PLAYER[PlayerType.WARRIOR],
-        },
-    },
-    {
-        coordinates: { q: 15, r: 0 },
-        config: {
-            type: PlayerType.WARRIOR,
-            team: TeamType.ENEMY,
-            numberOfMoveCostPerTurn: NUMBER_OF_TILES_PER_TURN_BY_PLAYER[PlayerType.WARRIOR],
-            remainingMoveCost: NUMBER_OF_TILES_PER_TURN_BY_PLAYER[PlayerType.WARRIOR],
-        },
-    },
-]
-
 export const getConfigByHex = (config: HexesConfigItem[], hex: Hex) => {
-    const configItem = config.find(({ coordinates }) => hex.q === coordinates.q && hex.r === coordinates.r)
+    const configItem = config.find(({ coordinates }) => hex.equals(coordinates))
     return configItem?.config || DEFAULT_HEX_CONFIG
 }
 
@@ -80,22 +36,34 @@ export const sumPathMoveCost = (path?: Hex[]) => {
     return trimmedPath.reduce((memo, hex) => memo + (hex?.config?.moveCost || 0), 0) || Infinity
 }
 
-export const getGridWithUpdatedMoveCosts = (grid: Grid<Hex>, playerType: PlayerType) => {
+export const getPlayerByCoordinates = (players: PlayerConfigItem[], destination: Coordinates) => {
+    return players.find((player) => {
+        return destination.q === player.coordinates.q && destination.r === player.coordinates.r
+    })
+}
+
+export const getGridWithUpdatedMoveCosts = (grid: Grid<Hex>, playerType: PlayerType, players: PlayerConfigItem[]) => {
     return grid.map((hex) => {
         const newHex = hex.clone() as Hex
+
+        const player = getPlayerByCoordinates(players, hex)
+
+        const moveCostByHexType = getMoveCostByPlayerAndType(playerType, hex.config?.type)
+        const moveCostByPlayerOnHex = player ? Infinity : 0
+
         newHex.config = {
             ...hex.config,
-            moveCost: getMoveCostByPlayerAndType(playerType, hex.config?.type),
+            moveCost: Math.max(moveCostByHexType, moveCostByPlayerOnHex),
         }
 
         return newHex
     })
 }
 
-export const getAvailableHexesToMove = (grid: Grid<Hex>, player?: PlayerConfigItem) => {
+export const getAvailableHexesToMove = (grid: Grid<Hex>, players: PlayerConfigItem[], player?: PlayerConfigItem) => {
     if (!player) return []
 
-    const updatedGrid = getGridWithUpdatedMoveCosts(grid, player.config.type)
+    const updatedGrid = getGridWithUpdatedMoveCosts(grid, player.config.type, players)
     const startHexagon = updatedGrid.getHex({ q: player.coordinates.q, r: player.coordinates.r })
     if (!startHexagon) return []
 
@@ -109,14 +77,62 @@ export const getAvailableHexesToMove = (grid: Grid<Hex>, player?: PlayerConfigIt
         .toArray()
 
     return availableHexes.filter((hex) => {
+        const playerOnHex = getPlayerByCoordinates(players, hex)
+
         const pathToHex = hexagonPathfinding.aStar(updatedGrid, startHexagon, hex)
         const moveCostsSum = sumPathMoveCost(pathToHex)
 
-        return moveCostsSum <= player.config.remainingMoveCost
+        const isFilteredByPathCost = moveCostsSum > player.config.remainingMoveCost
+        const isFilteredBySomePlayerOnHex = !!playerOnHex
+
+        return !(isFilteredByPathCost || isFilteredBySomePlayerOnHex)
     })
 }
 
-export const getInitialPlayerMoveState = (): GamePlayerMoveState => ({ path: [], availableHexesToMove: [] })
+export const getAvailableHexesToMeleeAttack = (grid: Grid<Hex>, player?: PlayerConfigItem) => {
+    if (!player) return []
+
+    const startHexagon = grid.getHex({ q: player.coordinates.q, r: player.coordinates.r })
+    if (!startHexagon) return []
+
+    const hexes = grid
+        .traverse(
+            spiral({
+                start: startHexagon,
+                radius: MELEE_ATTACK_RANGE_BY_PLAYER[player.config.type],
+            }),
+        )
+        .toArray()
+
+    return hexes.filter((hex) => !hex.equals(startHexagon))
+}
+
+export const getPathToMove = (
+    grid: Grid<Hex>,
+    currentPlayer: PlayerConfigItem,
+    players: PlayerConfigItem[],
+    destination: Hex,
+) => {
+    const updatedGrid = getGridWithUpdatedMoveCosts(grid, currentPlayer.config.type, players)
+
+    const startHexagon = updatedGrid.getHex({ q: currentPlayer.coordinates.q, r: currentPlayer.coordinates.r })
+    const goalHexagon = updatedGrid.getHex({ q: destination.q, r: destination.r })
+
+    return startHexagon && goalHexagon ? hexagonPathfinding.aStar(updatedGrid, startHexagon, goalHexagon) || [] : []
+}
+
+export const getPathToAttack = (grid: Grid<Hex>, currentPlayer: PlayerConfigItem, destination: Hex) => {
+    const startHexagon = grid.getHex({ q: currentPlayer.coordinates.q, r: currentPlayer.coordinates.r })
+    const goalHexagon = grid.getHex({ q: destination.q, r: destination.r })
+
+    return startHexagon && goalHexagon ? [startHexagon, goalHexagon] : []
+}
+
+export const getInitialPlayerMoveState = (): GamePlayerMoveState => ({
+    moveType: MoveType.MOVE,
+    path: [],
+    availableHexesToMove: [],
+})
 
 export const getInitialGameConfig = (): { grid: Grid<Hex>; players: PlayerConfigItem[] } => {
     const Tile = defineHex({ dimensions: 40, origin: 'topLeft', orientation: Orientation.FLAT })

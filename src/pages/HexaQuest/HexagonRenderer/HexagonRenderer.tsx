@@ -3,6 +3,7 @@ import React from 'react'
 import HexagonField from './HexagonField/HexagonField'
 import HexagonPlayer from './HexagonPlayer/HexagonPlayer'
 
+import { getPlayerByCoordinates } from '../hexaQuestHelpers'
 import { GamePlayerMoveState, GamePlayersState, Hex, PlayerConfigItem, TeamType } from '@entityTypes/hexaQuest'
 
 export type HexagonRendererProps = {
@@ -22,9 +23,7 @@ export type HexagonRendererState = {
 }
 
 const HexagonRenderer = ({ hex, currentPlayer, playerMoveState, playersGameState }: HexagonRendererProps) => {
-    const player = playersGameState.players.find((player) => {
-        return hex.q === player.coordinates.q && hex.r === player.coordinates.r
-    })
+    const player = getPlayerByCoordinates(playersGameState.players, hex)
 
     const rendererState: HexagonRendererState = {
         hex,
