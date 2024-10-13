@@ -4,7 +4,8 @@ import Button from '@mui/material/Button'
 import Hexagon from '@components/Hexagon/Hexagon'
 import HexagonPath from '@components/HexagonPath/HexagonPath'
 import HexagonGrid from '@components/HexagonGrid/HexagonGrid'
-import HexagonRenderer from '@pages/HexaQuest/HexagonRenderer/HexagonRenderer'
+import HexagonRenderer from './HexagonRenderer/HexagonRenderer'
+import HexagonInfoTooltip from './HexagonInfoTooltip/HexagonInfoTooltip'
 
 import { Grid } from 'honeycomb-grid'
 import { GamePlayerMoveState, GamePlayersState, Hex, MoveType, PlayerConfigItem } from '@entityTypes/hexaQuest'
@@ -14,6 +15,7 @@ import {
     sumPathMoveCost,
     getInitialGameConfig,
     getPlayerByCoordinates,
+    getHexagonRendererState,
     getAvailableHexesToMove,
     getInitialPlayerMoveState,
     getAvailableHexesToAttack,
@@ -24,7 +26,6 @@ import './HexaQuest.less'
 
 const HexaQuest = () => {
     const [grid, setGrid] = useState<Grid<Hex>>()
-    const [hoveredHex, setHoveredHex] = useState<Hex | undefined>()
     const [playerMoveState, setPlayerMoveState] = useState<GamePlayerMoveState>(getInitialPlayerMoveState())
     const [playersGameState, setPlayersGameState] = useState<GamePlayersState>({
         players: [],
@@ -162,6 +163,29 @@ const HexaQuest = () => {
         })
     }
 
+    const onHexHover = (hex?: Hex) => {
+        const updatePath = (path: Hex[]) => {
+            setPlayerMoveState((state) => ({ ...state, path }))
+        }
+
+        if (!grid || !hex || !currentPlayer) {
+            return updatePath([])
+        }
+
+        const isHexAccessibleByPlayer = playerMoveState.availableHexesToMove.some((availableHex) =>
+            hex.equals(availableHex),
+        )
+        if (!isHexAccessibleByPlayer) {
+            return updatePath([])
+        }
+
+        updatePath(
+            playerMoveState.moveType === MoveType.MOVE
+                ? getPathToMove(grid, currentPlayer, playersGameState.players, hex)
+                : getPathToAttack(grid, currentPlayer, hex),
+        )
+    }
+
     useEffect(() => {
         const { grid, players } = getInitialGameConfig()
 
@@ -180,39 +204,6 @@ const HexaQuest = () => {
                     : getAvailableHexesToAttack(grid, currentPlayer, playerMoveState.moveType),
         }))
     }, [currentPlayer, playerMoveState.moveType, playersGameState.players])
-
-    useEffect(() => {
-        const resetPath = () => {
-            setPlayerMoveState((state) => ({ ...state, path: [] }))
-        }
-
-        if (!grid || !hoveredHex || !currentPlayer) {
-            return resetPath()
-        }
-
-        const isHexAccessibleByPlayer = playerMoveState.availableHexesToMove.some(
-            (availableHex) => availableHex.q === hoveredHex.q && availableHex.r === hoveredHex.r,
-        )
-        if (!isHexAccessibleByPlayer) {
-            return resetPath()
-        }
-
-        const path =
-            playerMoveState.moveType === MoveType.MOVE
-                ? getPathToMove(grid, currentPlayer, playersGameState.players, hoveredHex)
-                : getPathToAttack(grid, currentPlayer, hoveredHex)
-
-        setPlayerMoveState((state) => ({
-            ...state,
-            path,
-        }))
-    }, [
-        hoveredHex,
-        currentPlayer,
-        playersGameState.players,
-        playerMoveState.moveType,
-        playerMoveState.availableHexesToMove,
-    ])
 
     return (
         <div className="center-page justify-start" style={{ position: 'relative' }}>
@@ -254,23 +245,28 @@ const HexaQuest = () => {
                     className="hexagon-grid"
                     width={grid?.pixelWidth}
                     height={grid?.pixelHeight}
-                    onMouseLeave={() => setHoveredHex(undefined)}
+                    onMouseLeave={() => onHexHover(undefined)}
                 >
                     {grid?.toArray()?.map((hex, index) => {
+                        const rendererState = getHexagonRendererState({
+                            hex,
+                            currentPlayer,
+                            playerMoveState,
+                            playersGameState,
+                        })
+
                         return (
-                            <Hexagon
-                                key={index}
-                                hex={hex}
-                                onClick={() => onHexagonClick(hex)}
-                                onMouseEnter={() => setHoveredHex(hex)}
-                            >
-                                <HexagonRenderer
-                                    hex={hex}
-                                    currentPlayer={currentPlayer}
-                                    playerMoveState={playerMoveState}
-                                    playersGameState={playersGameState}
-                                />
-                            </Hexagon>
+                            <React.Fragment key={index}>
+                                <HexagonInfoTooltip rendererState={rendererState}>
+                                    <Hexagon
+                                        rendererState={rendererState}
+                                        onClick={() => onHexagonClick(hex)}
+                                        onMouseEnter={() => onHexHover(hex)}
+                                    >
+                                        <HexagonRenderer rendererState={rendererState} />
+                                    </Hexagon>
+                                </HexagonInfoTooltip>
+                            </React.Fragment>
                         )
                     })}
                     <HexagonPath hexes={playerMoveState?.path || []} />

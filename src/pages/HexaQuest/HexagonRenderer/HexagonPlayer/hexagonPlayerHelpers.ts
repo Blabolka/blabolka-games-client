@@ -13,10 +13,10 @@ export const getPlayerTextByType = (playerType: PlayerType) => {
 
 export const getPlayerColorByType = (teamType: TeamType) => {
     switch (teamType) {
-        case TeamType.FRIEND: {
+        case TeamType.BLUE: {
             return 'blue'
         }
-        case TeamType.ENEMY: {
+        case TeamType.RED: {
             return 'red'
         }
     }

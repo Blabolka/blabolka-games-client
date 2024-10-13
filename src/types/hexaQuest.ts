@@ -23,8 +23,8 @@ export type HexesConfigItem = { coordinates: Coordinates; config: HexConfig }
 
 // Team types
 export enum TeamType {
-    FRIEND = 'friend',
-    ENEMY = 'enemy',
+    BLUE = 'blue',
+    RED = 'red',
 }
 
 // Player types
@@ -38,6 +38,7 @@ export type PlayerConfig = {
     team: TeamType
     numberOfMoveCostPerTurn: number
     numberOfActionsPerTurn: number
+    numberOfHealthPoints: number
     remainingMoveCost: number
     remainingActions: number
     remainingHealthPoints: number
@@ -67,4 +68,24 @@ export type GamePlayerMoveState = {
 export type GamePlayersState = {
     players: PlayerConfigItem[]
     currentPlayerCoordinates?: Coordinates
+}
+
+// Hex renderer types
+export type HexagonRendererDataProps = {
+    hex: Hex
+    currentPlayer?: PlayerConfigItem
+    playersGameState: GamePlayersState
+    playerMoveState: GamePlayerMoveState
+}
+
+export type HexagonRendererState = {
+    hex: Hex
+    player?: PlayerConfigItem
+    currentPlayer?: PlayerConfigItem
+    playersGameState: GamePlayersState
+    playerMoveState: GamePlayerMoveState
+    isCurrentPlayer: boolean
+    isEnemyPlayer: boolean
+    isFriendPlayer: boolean
+    isHexAccessibleByPlayer: boolean
 }

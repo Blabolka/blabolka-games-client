@@ -19,6 +19,7 @@ const createPlayersConfig = (): PlayerConfigItem[] => {
                 ...player.config,
                 numberOfMoveCostPerTurn: NUMBER_OF_TILES_PER_TURN_BY_PLAYER[type],
                 numberOfActionsPerTurn: NUMBER_OF_ACTIONS_PER_TURN_BY_PLAYER[type],
+                numberOfHealthPoints: NUMBER_OF_HEALTH_POINTS_BY_PLAYER[type],
                 remainingMoveCost: NUMBER_OF_TILES_PER_TURN_BY_PLAYER[type],
                 remainingActions: NUMBER_OF_ACTIONS_PER_TURN_BY_PLAYER[type],
                 remainingHealthPoints: NUMBER_OF_HEALTH_POINTS_BY_PLAYER[type],
@@ -30,14 +31,14 @@ const createPlayersConfig = (): PlayerConfigItem[] => {
             coordinates: { q: 0, r: 0 },
             config: {
                 type: PlayerType.WARRIOR,
-                team: TeamType.FRIEND,
+                team: TeamType.BLUE,
             },
         },
         {
             coordinates: { q: 0, r: 1 },
             config: {
                 type: PlayerType.ARCHER,
-                team: TeamType.FRIEND,
+                team: TeamType.BLUE,
             },
         },
     ]
@@ -46,14 +47,22 @@ const createPlayersConfig = (): PlayerConfigItem[] => {
             coordinates: { q: 15, r: 0 },
             config: {
                 type: PlayerType.WARRIOR,
-                team: TeamType.ENEMY,
+                team: TeamType.RED,
+            },
+        },
+        {
+            coordinates: { q: 15, r: -1 },
+            config: {
+                type: PlayerType.ARCHER,
+                team: TeamType.RED,
             },
         },
     ]
 
-    return [...FRIEND_TEAM_PLAYERS, ...ENEMY_TEAM_PLAYERS].map((player) => {
-        return getUpdatedPlayerConfig(player)
-    })
+    const maxLength = Math.max(FRIEND_TEAM_PLAYERS.length, ENEMY_TEAM_PLAYERS.length)
+    return Array.from({ length: maxLength })
+        .flatMap((_, i) => [FRIEND_TEAM_PLAYERS[i], ENEMY_TEAM_PLAYERS[i]].filter(Boolean))
+        .map(getUpdatedPlayerConfig)
 }
 
 export const NUMBER_OF_TILES_PER_TURN_BY_PLAYER = {

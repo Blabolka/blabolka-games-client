@@ -16,6 +16,8 @@ import {
     HexesConfigItem,
     PlayerConfigItem,
     GamePlayerMoveState,
+    HexagonRendererState,
+    HexagonRendererDataProps,
 } from '@entityTypes/hexaQuest'
 
 export const getConfigByHex = (config: HexesConfigItem[], hex: Hex) => {
@@ -149,4 +151,29 @@ export const getInitialGameConfig = (): { grid: Grid<Hex>; players: PlayerConfig
     })
 
     return { grid, players: PLAYERS_CONFIG }
+}
+
+export const getHexagonRendererState = ({
+    hex,
+    currentPlayer,
+    playerMoveState,
+    playersGameState,
+}: HexagonRendererDataProps): HexagonRendererState => {
+    const player = getPlayerByCoordinates(playersGameState.players, hex)
+
+    return {
+        hex,
+        player,
+        currentPlayer,
+        playerMoveState,
+        playersGameState,
+        isCurrentPlayer:
+            player?.coordinates?.q === currentPlayer?.coordinates?.q &&
+            player?.coordinates?.r === currentPlayer?.coordinates?.r,
+        isFriendPlayer: currentPlayer?.config.team === player?.config.team,
+        isEnemyPlayer: currentPlayer?.config.team !== player?.config.team,
+        isHexAccessibleByPlayer: playerMoveState.availableHexesToMove.some(
+            (availableHex) => availableHex.q === hex.q && availableHex.r === hex.r,
+        ),
+    }
 }
