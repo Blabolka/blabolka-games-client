@@ -110,6 +110,7 @@ export const ATTACK_CONFIG_BY_PLAYER: Record<string, Record<string, AttackConfig
         [MoveType.RANGE_ATTACK]: {
             range: 5,
             damage: 5,
+            offset: 1,
         },
     },
 }

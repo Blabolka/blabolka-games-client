@@ -50,6 +50,7 @@ export type PlayerConfigItem = { coordinates: Coordinates; config: PlayerConfig 
 export type AttackConfig = {
     range: number
     damage: number
+    offset?: number
 }
 
 // Game and move types

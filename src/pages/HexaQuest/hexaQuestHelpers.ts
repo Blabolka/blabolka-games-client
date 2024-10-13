@@ -105,7 +105,7 @@ export const getAvailableHexesToAttack = (grid: Grid<Hex>, player?: PlayerConfig
     const attackConfig = getAttackConfigByPlayerAndType(player.config.type, attackType)
     if (!attackConfig) return []
 
-    const hexes = grid
+    const attackHexes = grid
         .traverse(
             spiral({
                 start: startHexagon,
@@ -114,7 +114,20 @@ export const getAvailableHexesToAttack = (grid: Grid<Hex>, player?: PlayerConfig
         )
         .toArray()
 
-    return hexes.filter((hex) => !hex.equals(startHexagon))
+    const attackOffsetHexes = attackConfig.offset
+        ? grid
+              .traverse(
+                  spiral({
+                      start: startHexagon,
+                      radius: attackConfig.offset,
+                  }),
+              )
+              .toArray()
+        : []
+
+    return attackHexes.filter(
+        (hex) => !hex.equals(startHexagon) && !attackOffsetHexes.some((offsetHex) => hex.equals(offsetHex)),
+    )
 }
 
 export const getPathToMove = (
