@@ -5,6 +5,9 @@ export const getPlayerTextByType = (playerType: PlayerType) => {
         case PlayerType.WARRIOR: {
             return 'Warrior'
         }
+        case PlayerType.ARCHER: {
+            return 'Archer'
+        }
     }
 }
 

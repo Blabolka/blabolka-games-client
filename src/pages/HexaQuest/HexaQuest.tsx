@@ -16,7 +16,7 @@ import {
     getPlayerByCoordinates,
     getAvailableHexesToMove,
     getInitialPlayerMoveState,
-    getAvailableHexesToMeleeAttack,
+    getAvailableHexesToAttack,
 } from './hexaQuestHelpers'
 
 import './HexaQuest.less'
@@ -66,7 +66,34 @@ const HexaQuest = () => {
         })
     }
 
-    const onPlayerMeleeAttack = () => {}
+    const onPlayerAttack = (hex: Hex) => {
+        setPlayerMoveState(getInitialPlayerMoveState())
+        setPlayersGameState({
+            ...playersGameState,
+            players: playersGameState.players.reduce<PlayerConfigItem[]>((memo, player) => {
+                const isCurrentPlayer =
+                    player.coordinates.q === playersGameState.currentPlayerCoordinates?.q &&
+                    player.coordinates.r === playersGameState.currentPlayerCoordinates?.r
+                const isAttackedPlayer = player.coordinates.q === hex.q && player.coordinates.r === hex.r
+
+                if (isCurrentPlayer) {
+                    memo.push({
+                        ...player,
+                        config: {
+                            ...player.config,
+                            remainingActions: player.config.remainingActions - 1,
+                        },
+                    })
+                } else if (isAttackedPlayer) {
+                    // TODO now we just remove player by in future should implement logic of change of damage
+                } else {
+                    memo.push(player)
+                }
+
+                return memo
+            }, []),
+        })
+    }
 
     const onHexagonClick = (hex: Hex) => {
         switch (playerMoveState.moveType) {
@@ -74,19 +101,20 @@ const HexaQuest = () => {
                 onPlayerMove(hex)
                 break
             case MoveType.MELEE_ATTACK:
-                onPlayerMeleeAttack()
+            case MoveType.RANGE_ATTACK:
+                onPlayerAttack(hex)
                 break
         }
     }
 
-    const onPlayerMeleeAttackStart = () => {
+    const onPlayerAttackStart = (moveType: MoveType) => {
         setPlayerMoveState((state) => ({
             ...state,
-            moveType: MoveType.MELEE_ATTACK,
+            moveType,
         }))
     }
 
-    const onPlayerMeleeAttackCancel = () => {
+    const onPlayerMoveCancel = () => {
         setPlayerMoveState(getInitialPlayerMoveState())
     }
 
@@ -110,6 +138,7 @@ const HexaQuest = () => {
                           ...player,
                           config: {
                               ...player.config,
+                              remainingActions: player.config.numberOfActionsPerTurn,
                               remainingMoveCost: player.config.numberOfMoveCostPerTurn,
                           },
                       }
@@ -133,7 +162,7 @@ const HexaQuest = () => {
             availableHexesToMove:
                 playerMoveState.moveType === MoveType.MOVE
                     ? getAvailableHexesToMove(grid, playersGameState.players, currentPlayer)
-                    : getAvailableHexesToMeleeAttack(grid, currentPlayer),
+                    : getAvailableHexesToAttack(grid, currentPlayer, playerMoveState.moveType),
         }))
     }, [currentPlayer, playerMoveState.moveType, playersGameState.players])
 
@@ -173,23 +202,36 @@ const HexaQuest = () => {
     return (
         <div className="center-page justify-start" style={{ position: 'relative' }}>
             <div className="column gap-4 hexa-quest__gui" style={{ position: 'absolute', top: '24px', right: '8px' }}>
+                <span>Remaining actions: {currentPlayer?.config?.remainingActions}</span>
                 <span>Remaining moves: {currentPlayer?.config?.remainingMoveCost}</span>
-                <div className="row">
-                    <Button
-                        size="small"
-                        color="inherit"
-                        variant={playerMoveState.moveType === MoveType.MELEE_ATTACK ? 'outlined' : 'contained'}
-                        onClick={
-                            playerMoveState.moveType === MoveType.MELEE_ATTACK
-                                ? onPlayerMeleeAttackCancel
-                                : onPlayerMeleeAttackStart
-                        }
-                    >
-                        {playerMoveState.moveType === MoveType.MELEE_ATTACK ? 'Cancel attack' : 'Melee attack'}
-                    </Button>
-                </div>
+                <Button
+                    size="small"
+                    color="inherit"
+                    disabled={!currentPlayer?.config?.remainingActions}
+                    variant={playerMoveState.moveType === MoveType.MELEE_ATTACK ? 'outlined' : 'contained'}
+                    onClick={
+                        playerMoveState.moveType === MoveType.MELEE_ATTACK
+                            ? onPlayerMoveCancel
+                            : () => onPlayerAttackStart(MoveType.MELEE_ATTACK)
+                    }
+                >
+                    {playerMoveState.moveType === MoveType.MELEE_ATTACK ? 'Cancel attack' : 'Melee attack'}
+                </Button>
+                <Button
+                    size="small"
+                    color="inherit"
+                    disabled={!currentPlayer?.config?.remainingActions}
+                    variant={playerMoveState.moveType === MoveType.RANGE_ATTACK ? 'outlined' : 'contained'}
+                    onClick={
+                        playerMoveState.moveType === MoveType.RANGE_ATTACK
+                            ? onPlayerMoveCancel
+                            : () => onPlayerAttackStart(MoveType.RANGE_ATTACK)
+                    }
+                >
+                    {playerMoveState.moveType === MoveType.RANGE_ATTACK ? 'Cancel attack' : 'Range attack'}
+                </Button>
                 <Button variant="contained" color="inherit" size="small" onClick={onPlayerFinishMove}>
-                    Finish move
+                    End turn
                 </Button>
             </div>
             <div className="column align-center">

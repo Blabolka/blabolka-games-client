@@ -11,7 +11,6 @@ export enum HexType {
     BUSH = 'bush',
     FOREST = 'forest',
     WATER = 'water',
-    IMPASSABLE = 'impassable',
 }
 
 export type HexConfig = {
@@ -31,13 +30,16 @@ export enum TeamType {
 // Player types
 export enum PlayerType {
     WARRIOR = 'warrior',
+    ARCHER = 'archer',
 }
 
 export type PlayerConfig = {
     type: PlayerType
     team: TeamType
     numberOfMoveCostPerTurn: number
+    numberOfActionsPerTurn: number
     remainingMoveCost: number
+    remainingActions: number
 }
 
 export type PlayerConfigItem = { coordinates: Coordinates; config: PlayerConfig }
@@ -46,6 +48,7 @@ export type PlayerConfigItem = { coordinates: Coordinates; config: PlayerConfig 
 export enum MoveType {
     MOVE = 'move',
     MELEE_ATTACK = 'meleeAttack',
+    RANGE_ATTACK = 'rangeAttack',
 }
 
 export type GamePlayerMoveState = {

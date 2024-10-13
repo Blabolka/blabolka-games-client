@@ -4,7 +4,7 @@ import {
     HEXES_CONFIG,
     PLAYERS_CONFIG,
     DEFAULT_HEX_CONFIG,
-    MELEE_ATTACK_RANGE_BY_PLAYER,
+    ATTACK_RANGE_BY_PLAYER,
     MOVE_COST_BY_PLAYER_AND_HEX_TYPE,
 } from './hexaQuestContants'
 import {
@@ -89,8 +89,8 @@ export const getAvailableHexesToMove = (grid: Grid<Hex>, players: PlayerConfigIt
     })
 }
 
-export const getAvailableHexesToMeleeAttack = (grid: Grid<Hex>, player?: PlayerConfigItem) => {
-    if (!player) return []
+export const getAvailableHexesToAttack = (grid: Grid<Hex>, player?: PlayerConfigItem, attackType?: MoveType) => {
+    if (!player || !attackType) return []
 
     const startHexagon = grid.getHex({ q: player.coordinates.q, r: player.coordinates.r })
     if (!startHexagon) return []
@@ -99,7 +99,7 @@ export const getAvailableHexesToMeleeAttack = (grid: Grid<Hex>, player?: PlayerC
         .traverse(
             spiral({
                 start: startHexagon,
-                radius: MELEE_ATTACK_RANGE_BY_PLAYER[player.config.type],
+                radius: ATTACK_RANGE_BY_PLAYER[player.config.type][attackType],
             }),
         )
         .toArray()
