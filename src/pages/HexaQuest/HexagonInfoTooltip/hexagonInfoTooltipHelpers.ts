@@ -32,7 +32,7 @@ export const getAttackDamageMessage = (rendererState: HexagonRendererState) => {
         rendererState.currentPlayer?.config.type,
         rendererState.playerMoveState.moveType,
     )
-    return `Damage: ${attackConfig.damage}`
+    return attackConfig ? `Damage: ${attackConfig.damage}` : ''
 }
 
 export const getAccessMessage = (rendererState: HexagonRendererState) => {

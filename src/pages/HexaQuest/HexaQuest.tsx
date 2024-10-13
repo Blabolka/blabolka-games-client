@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react'
 
-import Button from '@mui/material/Button'
 import Hexagon from '@components/Hexagon/Hexagon'
 import HexagonPath from '@components/HexagonPath/HexagonPath'
 import HexagonGrid from '@components/HexagonGrid/HexagonGrid'
 import HexagonRenderer from './HexagonRenderer/HexagonRenderer'
+import HexaQuestGUI from '@pages/HexaQuest/HexaQuestGUI/HexaQuestGUI'
 import HexagonInfoTooltip from './HexagonInfoTooltip/HexagonInfoTooltip'
 
 import { Grid } from 'honeycomb-grid'
@@ -91,7 +91,9 @@ const HexaQuest = () => {
                         currentPlayer?.config.type,
                         playerMoveState.moveType,
                     )
-                    const remainingHealthPoints = Math.max(0, player.config.remainingHealthPoints - attackConfig.damage)
+                    const remainingHealthPoints = attackConfig
+                        ? Math.max(0, player.config.remainingHealthPoints - attackConfig.damage)
+                        : player.config.remainingHealthPoints
 
                     if (remainingHealthPoints) {
                         memo.push({
@@ -207,38 +209,15 @@ const HexaQuest = () => {
 
     return (
         <div className="center-page justify-start" style={{ position: 'relative' }}>
-            <div className="column gap-4 hexa-quest__gui" style={{ position: 'absolute', top: '24px', right: '8px' }}>
-                <span>Remaining actions: {currentPlayer?.config?.remainingActions}</span>
-                <span>Remaining moves: {currentPlayer?.config?.remainingMoveCost}</span>
-                <Button
-                    size="small"
-                    color="inherit"
-                    disabled={!currentPlayer?.config?.remainingActions}
-                    variant={playerMoveState.moveType === MoveType.MELEE_ATTACK ? 'outlined' : 'contained'}
-                    onClick={
-                        playerMoveState.moveType === MoveType.MELEE_ATTACK
-                            ? onPlayerMoveCancel
-                            : () => onPlayerAttackStart(MoveType.MELEE_ATTACK)
-                    }
-                >
-                    {playerMoveState.moveType === MoveType.MELEE_ATTACK ? 'Cancel attack' : 'Melee attack'}
-                </Button>
-                <Button
-                    size="small"
-                    color="inherit"
-                    disabled={!currentPlayer?.config?.remainingActions}
-                    variant={playerMoveState.moveType === MoveType.RANGE_ATTACK ? 'outlined' : 'contained'}
-                    onClick={
-                        playerMoveState.moveType === MoveType.RANGE_ATTACK
-                            ? onPlayerMoveCancel
-                            : () => onPlayerAttackStart(MoveType.RANGE_ATTACK)
-                    }
-                >
-                    {playerMoveState.moveType === MoveType.RANGE_ATTACK ? 'Cancel attack' : 'Range attack'}
-                </Button>
-                <Button variant="contained" color="inherit" size="small" onClick={onPlayerFinishMove}>
-                    End turn
-                </Button>
+            <div style={{ position: 'absolute', top: '24px', right: '8px' }}>
+                <HexaQuestGUI
+                    currentPlayer={currentPlayer}
+                    playerMoveState={playerMoveState}
+                    playersGameState={playersGameState}
+                    onPlayerAttackStart={onPlayerAttackStart}
+                    onPlayerMoveCancel={onPlayerMoveCancel}
+                    onPlayerFinishMove={onPlayerFinishMove}
+                />
             </div>
             <div className="column align-center">
                 <HexagonGrid

@@ -33,8 +33,7 @@ export const getMoveCostByPlayerAndType = (playerType?: PlayerType, hexType?: He
 
 export const getAttackConfigByPlayerAndType = (playerType?: PlayerType, attackType?: MoveType) => {
     const configByPlayer = playerType ? ATTACK_CONFIG_BY_PLAYER[playerType] : null
-    const configByPlayerAndAttackType = configByPlayer && attackType ? configByPlayer[attackType] : 0
-    return configByPlayerAndAttackType || { range: 0, damage: 0 }
+    return configByPlayer && attackType ? configByPlayer[attackType] : undefined
 }
 
 export const sumPathMoveCost = (path?: Hex[]) => {
@@ -104,6 +103,7 @@ export const getAvailableHexesToAttack = (grid: Grid<Hex>, player?: PlayerConfig
     if (!startHexagon) return []
 
     const attackConfig = getAttackConfigByPlayerAndType(player.config.type, attackType)
+    if (!attackConfig) return []
 
     const hexes = grid
         .traverse(

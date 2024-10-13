@@ -70,12 +70,15 @@ export type GamePlayersState = {
     currentPlayerCoordinates?: Coordinates
 }
 
-// Hex renderer types
-export type HexagonRendererDataProps = {
-    hex: Hex
+// Renderer types
+export type RenderDataProps = {
     currentPlayer?: PlayerConfigItem
     playersGameState: GamePlayersState
     playerMoveState: GamePlayerMoveState
+}
+
+export type HexagonRendererDataProps = RenderDataProps & {
+    hex: Hex
 }
 
 export type HexagonRendererState = {

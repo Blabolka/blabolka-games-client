@@ -105,11 +105,11 @@ export const ATTACK_CONFIG_BY_PLAYER: Record<string, Record<string, AttackConfig
     [PlayerType.ARCHER]: {
         [MoveType.MELEE_ATTACK]: {
             range: 1,
-            damage: 3,
+            damage: 7,
         },
         [MoveType.RANGE_ATTACK]: {
             range: 5,
-            damage: 6,
+            damage: 5,
         },
     },
 }
