@@ -40,9 +40,16 @@ export type PlayerConfig = {
     numberOfActionsPerTurn: number
     remainingMoveCost: number
     remainingActions: number
+    remainingHealthPoints: number
 }
 
 export type PlayerConfigItem = { coordinates: Coordinates; config: PlayerConfig }
+
+// Attack types
+export type AttackConfig = {
+    range: number
+    damage: number
+}
 
 // Game and move types
 export enum MoveType {

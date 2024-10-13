@@ -17,6 +17,7 @@ import {
     getAvailableHexesToMove,
     getInitialPlayerMoveState,
     getAvailableHexesToAttack,
+    getAttackConfigByPlayerAndType,
 } from './hexaQuestHelpers'
 
 import './HexaQuest.less'
@@ -85,7 +86,21 @@ const HexaQuest = () => {
                         },
                     })
                 } else if (isAttackedPlayer) {
-                    // TODO now we just remove player by in future should implement logic of change of damage
+                    const attackConfig = getAttackConfigByPlayerAndType(
+                        currentPlayer?.config.type,
+                        playerMoveState.moveType,
+                    )
+                    const remainingHealthPoints = Math.max(0, player.config.remainingHealthPoints - attackConfig.damage)
+
+                    if (remainingHealthPoints) {
+                        memo.push({
+                            ...player,
+                            config: {
+                                ...player.config,
+                                remainingHealthPoints,
+                            },
+                        })
+                    }
                 } else {
                     memo.push(player)
                 }

@@ -4,6 +4,7 @@ import {
     TeamType,
     HexConfig,
     PlayerType,
+    AttackConfig,
     HexesConfigItem,
     PlayerConfigItem,
 } from '@entityTypes/hexaQuest'
@@ -20,6 +21,7 @@ const createPlayersConfig = (): PlayerConfigItem[] => {
                 numberOfActionsPerTurn: NUMBER_OF_ACTIONS_PER_TURN_BY_PLAYER[type],
                 remainingMoveCost: NUMBER_OF_TILES_PER_TURN_BY_PLAYER[type],
                 remainingActions: NUMBER_OF_ACTIONS_PER_TURN_BY_PLAYER[type],
+                remainingHealthPoints: NUMBER_OF_HEALTH_POINTS_BY_PLAYER[type],
             },
         }
     }
@@ -64,6 +66,11 @@ export const NUMBER_OF_ACTIONS_PER_TURN_BY_PLAYER = {
     [PlayerType.ARCHER]: 1,
 }
 
+export const NUMBER_OF_HEALTH_POINTS_BY_PLAYER = {
+    [PlayerType.WARRIOR]: 30,
+    [PlayerType.ARCHER]: 20,
+}
+
 export const MOVE_COST_BY_PLAYER_AND_HEX_TYPE = {
     [PlayerType.WARRIOR]: {
         [HexType.DEFAULT]: 1,
@@ -79,13 +86,22 @@ export const MOVE_COST_BY_PLAYER_AND_HEX_TYPE = {
     },
 }
 
-export const ATTACK_RANGE_BY_PLAYER = {
+export const ATTACK_CONFIG_BY_PLAYER: Record<string, Record<string, AttackConfig>> = {
     [PlayerType.WARRIOR]: {
-        [MoveType.MELEE_ATTACK]: 1,
+        [MoveType.MELEE_ATTACK]: {
+            range: 1,
+            damage: 10,
+        },
     },
     [PlayerType.ARCHER]: {
-        [MoveType.MELEE_ATTACK]: 1,
-        [MoveType.RANGE_ATTACK]: 20,
+        [MoveType.MELEE_ATTACK]: {
+            range: 1,
+            damage: 3,
+        },
+        [MoveType.RANGE_ATTACK]: {
+            range: 5,
+            damage: 6,
+        },
     },
 }
 

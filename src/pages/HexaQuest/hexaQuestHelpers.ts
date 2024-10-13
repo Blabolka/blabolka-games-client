@@ -4,7 +4,7 @@ import {
     HEXES_CONFIG,
     PLAYERS_CONFIG,
     DEFAULT_HEX_CONFIG,
-    ATTACK_RANGE_BY_PLAYER,
+    ATTACK_CONFIG_BY_PLAYER,
     MOVE_COST_BY_PLAYER_AND_HEX_TYPE,
 } from './hexaQuestContants'
 import {
@@ -27,6 +27,12 @@ export const getMoveCostByPlayerAndType = (playerType?: PlayerType, hexType?: He
     const costsByPlayer = playerType ? MOVE_COST_BY_PLAYER_AND_HEX_TYPE[playerType] : null
     const costByType = hexType && costsByPlayer ? costsByPlayer[hexType] : 0
     return costByType || MOVE_COST_BY_PLAYER_AND_HEX_TYPE[HexType.DEFAULT]
+}
+
+export const getAttackConfigByPlayerAndType = (playerType?: PlayerType, attackType?: MoveType) => {
+    const configByPlayer = playerType ? ATTACK_CONFIG_BY_PLAYER[playerType] : null
+    const configByPlayerAndAttackType = configByPlayer && attackType ? configByPlayer[attackType] : 0
+    return configByPlayerAndAttackType || { range: 0, damage: 0 }
 }
 
 export const sumPathMoveCost = (path?: Hex[]) => {
@@ -95,11 +101,13 @@ export const getAvailableHexesToAttack = (grid: Grid<Hex>, player?: PlayerConfig
     const startHexagon = grid.getHex({ q: player.coordinates.q, r: player.coordinates.r })
     if (!startHexagon) return []
 
+    const attackConfig = getAttackConfigByPlayerAndType(player.config.type, attackType)
+
     const hexes = grid
         .traverse(
             spiral({
                 start: startHexagon,
-                radius: ATTACK_RANGE_BY_PLAYER[player.config.type][attackType],
+                radius: attackConfig.range,
             }),
         )
         .toArray()
