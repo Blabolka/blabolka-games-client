@@ -49,6 +49,7 @@ const HexaQuest = () => {
         const newPlayerCoordinates = { q: hex.q, r: hex.r }
         const pathCost = sumPathMoveCost(playerMoveState.path)
 
+        setPlayerMoveState(getInitialPlayerMoveState())
         setPlayersGameState({
             ...playersGameState,
             currentPlayerCoordinates: newPlayerCoordinates,
@@ -219,7 +220,7 @@ const HexaQuest = () => {
                     onPlayerFinishMove={onPlayerFinishMove}
                 />
             </div>
-            <div className="column align-center">
+            <div className="column align-center" style={{ width: '100%', overflow: 'auto' }}>
                 <HexagonGrid
                     className="hexagon-grid"
                     width={grid?.pixelWidth}

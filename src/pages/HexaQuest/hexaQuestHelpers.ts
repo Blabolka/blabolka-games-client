@@ -159,7 +159,7 @@ export const getInitialPlayerMoveState = (): GamePlayerMoveState => ({
 
 export const getInitialGameConfig = (): { grid: Grid<Hex>; players: PlayerConfigItem[] } => {
     const Tile = defineHex({ dimensions: 40, origin: 'topLeft', orientation: Orientation.FLAT })
-    const grid = new Grid(Tile, rectangle({ width: 16, height: 8 })).forEach((hex: Hex) => {
+    const grid = new Grid(Tile, rectangle({ width: 15, height: 8 })).forEach((hex: Hex) => {
         hex.config = getConfigByHex(HEXES_CONFIG, hex)
     })
 
