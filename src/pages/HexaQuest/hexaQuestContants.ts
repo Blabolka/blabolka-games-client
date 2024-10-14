@@ -83,15 +83,15 @@ export const NUMBER_OF_HEALTH_POINTS_BY_PLAYER = {
 export const MOVE_COST_BY_PLAYER_AND_HEX_TYPE = {
     [PlayerType.WARRIOR]: {
         [HexType.DEFAULT]: 1,
-        [HexType.BUSH]: 1,
-        [HexType.FOREST]: 2,
-        [HexType.WATER]: 3,
+        [HexType.BUSH]: 2,
+        [HexType.FOREST]: 3,
+        [HexType.WATER]: Infinity,
     },
     [PlayerType.ARCHER]: {
         [HexType.DEFAULT]: 1,
-        [HexType.BUSH]: 1,
-        [HexType.FOREST]: 2,
-        [HexType.WATER]: 3,
+        [HexType.BUSH]: 2,
+        [HexType.FOREST]: 3,
+        [HexType.WATER]: Infinity,
     },
 }
 

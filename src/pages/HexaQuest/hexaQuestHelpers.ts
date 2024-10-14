@@ -38,7 +38,7 @@ export const getAttackConfigByPlayerAndType = (playerType?: PlayerType, attackTy
 
 export const sumPathMoveCost = (path?: Hex[]) => {
     const trimmedPath = path?.slice(1) || [] // because first element always start element
-    if (!trimmedPath.length) return 0
+    if (!trimmedPath.length) return Infinity
 
     return trimmedPath.reduce((memo, hex) => memo + (hex?.config?.moveCost || 0), 0) || Infinity
 }
