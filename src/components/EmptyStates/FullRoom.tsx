@@ -4,7 +4,7 @@ import RoomImage from '@assets/img/room-icon.svg'
 
 const FullRoom = () => {
     return (
-        <div className="center-page">
+        <div className="container center-page">
             <div className="column">
                 <img src={RoomImage} alt="Room is full image" className="empty-state-image" />
                 <div className="column text-align-center">

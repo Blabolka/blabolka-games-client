@@ -189,9 +189,9 @@ const HexaQuest = () => {
     }
 
     useEffect(() => {
-        const { grid, players } = getInitialGameConfig()
+        const { grid: initialGrid, players } = getInitialGameConfig()
 
-        setGrid(grid)
+        setGrid(initialGrid)
         setPlayersGameState({ players, currentPlayerCoordinates: players[0].coordinates })
     }, [])
 
@@ -208,7 +208,7 @@ const HexaQuest = () => {
     }, [currentPlayer, playerMoveState.moveType, playersGameState.players])
 
     return (
-        <div className="center-page justify-start" style={{ position: 'relative' }}>
+        <div className="center-page hexa-quest__wrapper" style={{ position: 'relative' }}>
             <div style={{ position: 'absolute', top: '24px', right: '8px' }}>
                 <HexaQuestGUI
                     currentPlayer={currentPlayer}

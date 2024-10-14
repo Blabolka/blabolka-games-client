@@ -152,7 +152,7 @@ const TicTacToe = () => {
             ) : isRoomFull ? (
                 <FullRoom />
             ) : (
-                <div className="center-page">
+                <div className="container center-page">
                     <div className="row align-center justify-center" style={{ height: '70px' }}>
                         {isWaitingForPlayers && <ShareLink />}
                         {isOpenRestartGame && <TicTacToeRestartGame />}

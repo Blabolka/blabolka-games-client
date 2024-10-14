@@ -3,7 +3,7 @@ import React from 'react'
 import classnames from 'classnames'
 import HexagonImage from '@components/HexagonImage/HexagonImage'
 
-import { HexagonRendererState } from '../HexagonRenderer'
+import { HexagonRendererState } from '@entityTypes/hexaQuest'
 import { getHexagonFieldImageByType, calculateHexagonFieldImageSize } from './hexagonFieldHelpers'
 
 export type HexagonFieldProps = {

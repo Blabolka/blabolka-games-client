@@ -7,7 +7,7 @@ type BodyProps = {
 }
 
 const BodyWrapper = ({ children }: BodyProps) => {
-    return <div className="body__wrapper container">{children}</div>
+    return <div className="body__wrapper">{children}</div>
 }
 
 export default BodyWrapper

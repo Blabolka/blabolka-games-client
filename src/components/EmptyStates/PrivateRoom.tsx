@@ -43,7 +43,7 @@ const PrivateRoom = ({ roomId, passwordValidationCallback }: PrivateRoomProps) =
     }
 
     return (
-        <div className="center-page">
+        <div className="container center-page">
             <div className="column align-center">
                 <img src={LockedRoomImage} alt="Room is private image" className="empty-state-image" />
                 <span className="font-size-20px font-weight-medium">This is a private room</span>

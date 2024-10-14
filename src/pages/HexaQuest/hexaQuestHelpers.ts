@@ -172,7 +172,7 @@ export const getHexagonRendererState = ({
     playerMoveState,
     playersGameState,
 }: HexagonRendererDataProps): HexagonRendererState => {
-    const player = getPlayerByCoordinates(playersGameState.players, hex)
+    const player = getPlayerByCoordinates(playersGameState?.players || [], hex)
 
     return {
         hex,
@@ -185,7 +185,7 @@ export const getHexagonRendererState = ({
             player?.coordinates?.r === currentPlayer?.coordinates?.r,
         isFriendPlayer: currentPlayer?.config.team === player?.config.team,
         isEnemyPlayer: currentPlayer?.config.team !== player?.config.team,
-        isHexAccessibleByPlayer: playerMoveState.availableHexesToMove.some(
+        isHexAccessibleByPlayer: playerMoveState?.availableHexesToMove?.some(
             (availableHex) => availableHex.q === hex.q && availableHex.r === hex.r,
         ),
     }

@@ -30,7 +30,7 @@ const MainPage = () => {
 
     return (
         <>
-            <div className="center-page">
+            <div className="container center-page">
                 <div className="row align-center justify-center flex-wrap gap-64">
                     {GAMES.map(({ name, image, onClick }, index) => (
                         <button key={index} onClick={onClick} className="game-preview__wrapper">

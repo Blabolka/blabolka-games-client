@@ -3,7 +3,7 @@ const Dotenv = require('dotenv-webpack')
 const CopyPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
-const MiniCssExtractPlugin = require("mini-css-extract-plugin")
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 module.exports = (env, arguments) => {
     return {
@@ -74,14 +74,7 @@ module.exports = (env, arguments) => {
                 },
                 {
                     test: /\.(png|jp(e*)g|gif|svg)$/i,
-                    use: [
-                        {
-                            loader: 'url-loader',
-                            options: {
-                                limit: 8192,
-                            },
-                        },
-                    ],
+                    type: 'asset/resource',
                 },
             ],
         },
@@ -99,15 +92,12 @@ module.exports = (env, arguments) => {
         plugins: [
             new HtmlWebpackPlugin({ template: path.join(__dirname, 'public', 'index.html') }),
             new MiniCssExtractPlugin({
-                filename: 'app.min.css'
+                filename: 'app.min.css',
             }),
             new CleanWebpackPlugin(),
             new Dotenv(),
             new CopyPlugin({
-                patterns: [
-                    { from: 'public/favicon-controller.svg', to: 'img' },
-                    { from: 'public/_redirects' },
-                ],
+                patterns: [{ from: 'public/favicon-controller.svg', to: 'img' }, { from: 'public/_redirects' }],
             }),
         ],
         devServer: {

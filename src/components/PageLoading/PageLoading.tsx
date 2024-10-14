@@ -3,7 +3,7 @@ import CircularProgress from '@mui/material/CircularProgress'
 
 const PageLoading = () => {
     return (
-        <div className="center-page">
+        <div className="container center-page">
             <CircularProgress color="inherit" />
         </div>
     )
