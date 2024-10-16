@@ -13,6 +13,7 @@ module.exports = (env, arguments) => {
             path: path.resolve(__dirname, 'dist'),
             filename: '[name].[contenthash].js',
             chunkFilename: '[name].[chunkhash].js',
+            publicPath: '/',
         },
         resolve: {
             extensions: ['.tsx', '.ts', '.js'],
@@ -102,12 +103,12 @@ module.exports = (env, arguments) => {
         ],
         devServer: {
             port: 3000,
+            open: true,
+            compress: true,
+            historyApiFallback: true,
             static: {
                 directory: path.join(__dirname, 'public'),
             },
-            compress: true,
-            open: true,
-            historyApiFallback: true,
         },
     }
 }
