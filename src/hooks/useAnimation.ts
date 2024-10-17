@@ -1,15 +1,20 @@
 import { useEffect, useState } from 'react'
 
-export const useAnimation = ({ frameCount, duration }) => {
+export const useAnimation = ({ shouldAnimate = true, frameCount, duration }) => {
     const [currentFrame, setCurrentFrame] = useState(0)
 
     useEffect(() => {
+        if (!shouldAnimate) {
+            setCurrentFrame(0)
+            return
+        }
+
         const interval = setInterval(() => {
             setCurrentFrame((prevFrame) => (prevFrame + 1) % frameCount)
         }, (duration * 1000) / frameCount)
 
         return () => clearInterval(interval)
-    }, [frameCount, duration])
+    }, [shouldAnimate, frameCount, duration])
 
     return { currentFrame }
 }

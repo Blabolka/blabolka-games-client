@@ -33,9 +33,15 @@ export enum PlayerType {
     ARCHER = 'archer',
 }
 
+export enum PlayerViewDirections {
+    LEFT = 'left',
+    RIGHT = 'right',
+}
+
 export type PlayerConfig = {
     type: PlayerType
     team: TeamType
+    lastViewDirection: PlayerViewDirections
     numberOfMoveCostPerTurn: number
     numberOfActionsPerTurn: number
     numberOfHealthPoints: number

@@ -8,12 +8,13 @@ import HexaQuestGUI from '@pages/HexaQuest/HexaQuestGUI/HexaQuestGUI'
 import HexagonInfoTooltip from './HexagonInfoTooltip/HexagonInfoTooltip'
 
 import { Grid } from 'honeycomb-grid'
-import { GamePlayerMoveState, GamePlayersState, Hex, MoveType, PlayerConfigItem } from '@entityTypes/hexaQuest'
+import { Hex, MoveType, GamePlayersState, PlayerConfigItem, GamePlayerMoveState } from '@entityTypes/hexaQuest'
 import {
     getPathToMove,
     getPathToAttack,
     sumPathMoveCost,
     getInitialGameConfig,
+    getPlayerViewDirection,
     getPlayerByCoordinates,
     getHexagonRendererState,
     getAvailableHexesToMove,
@@ -166,7 +167,7 @@ const HexaQuest = () => {
         })
     }
 
-    const onHexHover = (hex?: Hex) => {
+    const onHexagonHover = (hex?: Hex) => {
         const updatePath = (path: Hex[]) => {
             setPlayerMoveState((state) => ({ ...state, path }))
         }
@@ -187,6 +188,32 @@ const HexaQuest = () => {
                 ? getPathToMove(grid, playersGameState.players, currentPlayer, hex)
                 : getPathToAttack(grid, currentPlayer, hex),
         )
+        setPlayersGameState((state) => ({
+            ...state,
+            players: playersGameState.players.reduce<PlayerConfigItem[]>((memo, player) => {
+                const isCurrentPlayer =
+                    player.coordinates.q === playersGameState.currentPlayerCoordinates?.q &&
+                    player.coordinates.r === playersGameState.currentPlayerCoordinates?.r
+
+                if (isCurrentPlayer) {
+                    memo.push({
+                        ...player,
+                        config: {
+                            ...player.config,
+                            lastViewDirection: getPlayerViewDirection(
+                                { q: player.coordinates.q, r: player.coordinates.r },
+                                { q: hex.q, r: hex.r },
+                                player.config.lastViewDirection,
+                            ),
+                        },
+                    })
+                } else {
+                    memo.push(player)
+                }
+
+                return memo
+            }, []),
+        }))
     }
 
     useEffect(() => {
@@ -225,7 +252,7 @@ const HexaQuest = () => {
                     className="hexagon-grid"
                     width={grid?.pixelWidth}
                     height={grid?.pixelHeight}
-                    onMouseLeave={() => onHexHover(undefined)}
+                    onMouseLeave={() => onHexagonHover(undefined)}
                 >
                     {grid?.toArray()?.map((hex, index) => {
                         const rendererState = getHexagonRendererState({
@@ -241,7 +268,7 @@ const HexaQuest = () => {
                                     <Hexagon
                                         rendererState={rendererState}
                                         onClick={() => onHexagonClick(hex)}
-                                        onMouseEnter={() => onHexHover(hex)}
+                                        onMouseEnter={() => onHexagonHover(hex)}
                                     >
                                         <HexagonRenderer rendererState={rendererState} />
                                     </Hexagon>

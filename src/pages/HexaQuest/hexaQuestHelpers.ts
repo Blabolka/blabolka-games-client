@@ -1,23 +1,24 @@
 import { defineHex, Grid, Orientation, rectangle, spiral } from 'honeycomb-grid'
 import hexagonPathfinding from '@services/hexagon/hexagonPathfinding'
 import {
-    HEXES_CONFIG,
-    PLAYERS_CONFIG,
-    DEFAULT_HEX_CONFIG,
     ATTACK_CONFIG_BY_PLAYER,
+    DEFAULT_HEX_CONFIG,
+    HEXES_CONFIG,
     MOVE_COST_BY_PLAYER_AND_HEX_TYPE,
+    PLAYERS_CONFIG,
 } from './hexaQuestContants'
 import {
+    Coordinates,
+    GamePlayerMoveState,
     Hex,
+    HexagonRendererDataProps,
+    HexagonRendererState,
+    HexesConfigItem,
     HexType,
     MoveType,
-    PlayerType,
-    Coordinates,
-    HexesConfigItem,
     PlayerConfigItem,
-    GamePlayerMoveState,
-    HexagonRendererState,
-    HexagonRendererDataProps,
+    PlayerType,
+    PlayerViewDirections,
 } from '@entityTypes/hexaQuest'
 
 // hexagonPathfinding.runTesting()
@@ -49,6 +50,18 @@ export const getPlayerByCoordinates = (players: PlayerConfigItem[], destination:
     return players.find((player) => {
         return destination.q === player.coordinates.q && destination.r === player.coordinates.r
     })
+}
+
+export const getPlayerViewDirection = (
+    start: Coordinates,
+    goal: Coordinates,
+    previousDirection: PlayerViewDirections,
+) => {
+    return start.q === goal.q
+        ? previousDirection
+        : start.q > goal.q
+        ? PlayerViewDirections.LEFT
+        : PlayerViewDirections.RIGHT
 }
 
 export const getPlayerMoveRangeGrid = (grid: Grid<Hex>, player) => {

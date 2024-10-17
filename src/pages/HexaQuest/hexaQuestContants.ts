@@ -7,6 +7,7 @@ import {
     AttackConfig,
     HexesConfigItem,
     PlayerConfigItem,
+    PlayerViewDirections,
 } from '@entityTypes/hexaQuest'
 
 const createPlayersConfig = (): PlayerConfigItem[] => {
@@ -32,6 +33,7 @@ const createPlayersConfig = (): PlayerConfigItem[] => {
             config: {
                 type: PlayerType.WARRIOR,
                 team: TeamType.BLUE,
+                lastViewDirection: PlayerViewDirections.RIGHT,
             },
         },
         {
@@ -39,6 +41,7 @@ const createPlayersConfig = (): PlayerConfigItem[] => {
             config: {
                 type: PlayerType.ARCHER,
                 team: TeamType.BLUE,
+                lastViewDirection: PlayerViewDirections.RIGHT,
             },
         },
     ]
@@ -48,6 +51,7 @@ const createPlayersConfig = (): PlayerConfigItem[] => {
             config: {
                 type: PlayerType.WARRIOR,
                 team: TeamType.RED,
+                lastViewDirection: PlayerViewDirections.LEFT,
             },
         },
         {
@@ -55,6 +59,7 @@ const createPlayersConfig = (): PlayerConfigItem[] => {
             config: {
                 type: PlayerType.ARCHER,
                 team: TeamType.RED,
+                lastViewDirection: PlayerViewDirections.LEFT,
             },
         },
     ]
