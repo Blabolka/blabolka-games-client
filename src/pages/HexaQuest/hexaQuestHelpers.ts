@@ -20,6 +20,8 @@ import {
     HexagonRendererDataProps,
 } from '@entityTypes/hexaQuest'
 
+// hexagonPathfinding.runTesting()
+
 export const getConfigByHex = (config: HexesConfigItem[], hex: Hex) => {
     const configItem = config.find(({ coordinates }) => hex.equals(coordinates))
     return configItem?.config || DEFAULT_HEX_CONFIG
@@ -49,6 +51,15 @@ export const getPlayerByCoordinates = (players: PlayerConfigItem[], destination:
     })
 }
 
+export const getPlayerMoveRangeGrid = (grid: Grid<Hex>, player) => {
+    return grid.traverse(
+        spiral({
+            radius: player.config.remainingMoveCost,
+            start: { q: player.coordinates.q, r: player.coordinates.r },
+        }),
+    )
+}
+
 export const getGridWithUpdatedMoveCosts = (grid: Grid<Hex>, playerType: PlayerType, players: PlayerConfigItem[]) => {
     return grid.map((hex) => {
         const newHex = hex.clone() as Hex
@@ -70,30 +81,23 @@ export const getGridWithUpdatedMoveCosts = (grid: Grid<Hex>, playerType: PlayerT
 export const getAvailableHexesToMove = (grid: Grid<Hex>, players: PlayerConfigItem[], player?: PlayerConfigItem) => {
     if (!player) return []
 
-    const updatedGrid = getGridWithUpdatedMoveCosts(grid, player.config.type, players)
+    const playerRangeGrid = getPlayerMoveRangeGrid(grid, player)
+    const updatedGrid = getGridWithUpdatedMoveCosts(playerRangeGrid, player.config.type, players)
     const startHexagon = updatedGrid.getHex({ q: player.coordinates.q, r: player.coordinates.r })
+
     if (!startHexagon) return []
 
-    const availableHexes = updatedGrid
-        .traverse(
-            spiral({
-                radius: player.config.numberOfMoveCostPerTurn,
-                start: { q: player.coordinates.q, r: player.coordinates.r },
-            }),
-        )
-        .toArray()
-
-    return availableHexes.filter((hex) => {
+    return updatedGrid.reduce<Hex[]>((memo, hex) => {
         const playerOnHex = getPlayerByCoordinates(players, hex)
 
-        const pathToHex = hexagonPathfinding.aStar(updatedGrid, startHexagon, hex)
+        const { path: pathToHex } = hexagonPathfinding.aStar({ grid: updatedGrid, start: startHexagon, goal: hex })
         const moveCostsSum = sumPathMoveCost(pathToHex)
 
         const isFilteredByPathCost = moveCostsSum > player.config.remainingMoveCost
         const isFilteredBySomePlayerOnHex = !!playerOnHex
 
-        return !(isFilteredByPathCost || isFilteredBySomePlayerOnHex)
-    })
+        return !(isFilteredByPathCost || isFilteredBySomePlayerOnHex) ? [...memo, hex] : memo
+    }, [])
 }
 
 export const getAvailableHexesToAttack = (grid: Grid<Hex>, player?: PlayerConfigItem, attackType?: MoveType) => {
@@ -130,18 +134,20 @@ export const getAvailableHexesToAttack = (grid: Grid<Hex>, player?: PlayerConfig
     )
 }
 
-export const getPathToMove = (
-    grid: Grid<Hex>,
-    currentPlayer: PlayerConfigItem,
-    players: PlayerConfigItem[],
-    destination: Hex,
-) => {
-    const updatedGrid = getGridWithUpdatedMoveCosts(grid, currentPlayer.config.type, players)
+export const getPathToMove = (grid: Grid<Hex>, players: PlayerConfigItem[], player: PlayerConfigItem, goal: Hex) => {
+    const playerRangeGrid = getPlayerMoveRangeGrid(grid, player)
+    const updatedGrid = getGridWithUpdatedMoveCosts(playerRangeGrid, player.config.type, players)
 
-    const startHexagon = updatedGrid.getHex({ q: currentPlayer.coordinates.q, r: currentPlayer.coordinates.r })
-    const goalHexagon = updatedGrid.getHex({ q: destination.q, r: destination.r })
+    const startHexagon = updatedGrid.getHex({ q: player.coordinates.q, r: player.coordinates.r })
+    const goalHexagon = updatedGrid.getHex({ q: goal.q, r: goal.r })
 
-    return startHexagon && goalHexagon ? hexagonPathfinding.aStar(updatedGrid, startHexagon, goalHexagon) || [] : []
+    return startHexagon && goalHexagon
+        ? hexagonPathfinding.aStar({
+              grid: updatedGrid,
+              start: startHexagon,
+              goal: goalHexagon,
+          }).path
+        : []
 }
 
 export const getPathToAttack = (grid: Grid<Hex>, currentPlayer: PlayerConfigItem, destination: Hex) => {

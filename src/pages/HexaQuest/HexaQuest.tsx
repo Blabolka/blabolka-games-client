@@ -184,7 +184,7 @@ const HexaQuest = () => {
 
         updatePath(
             playerMoveState.moveType === MoveType.MOVE
-                ? getPathToMove(grid, currentPlayer, playersGameState.players, hex)
+                ? getPathToMove(grid, playersGameState.players, currentPlayer, hex)
                 : getPathToAttack(grid, currentPlayer, hex),
         )
     }

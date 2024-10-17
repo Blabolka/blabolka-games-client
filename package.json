@@ -38,6 +38,7 @@
         "copy-webpack-plugin": "^10.2.4",
         "core-js": "^3.21.1",
         "css-loader": "^6.7.0",
+        "dijkstrajs": "^1.0.3",
         "dotenv-webpack": "^7.1.0",
         "honeycomb-grid": "^4.1.5",
         "html-webpack-plugin": "^5.5.0",
