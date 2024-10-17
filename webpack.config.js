@@ -20,9 +20,9 @@ module.exports = (env, arguments) => {
             roots: [__dirname],
             alias: {
                 '@api': path.resolve('src', 'api'),
-                '@hooks': path.resolve('src', 'app', 'hooks'),
                 '@assets': path.resolve('src', 'assets'),
                 '@components': path.resolve('src', 'components'),
+                '@hooks': path.resolve('src', 'hooks'),
                 '@lib': path.resolve('src', 'lib'),
                 '@pages': path.resolve('src', 'pages'),
                 '@services': path.resolve('src', 'services'),
