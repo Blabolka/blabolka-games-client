@@ -8,7 +8,15 @@ import HexaQuestGUI from '@pages/HexaQuest/HexaQuestGUI/HexaQuestGUI'
 import HexagonInfoTooltip from './HexagonInfoTooltip/HexagonInfoTooltip'
 
 import { Grid } from 'honeycomb-grid'
-import { Hex, MoveType, GamePlayersState, PlayerConfigItem, GamePlayerMoveState } from '@entityTypes/hexaQuest'
+import {
+    Hex,
+    MoveType,
+    Animation,
+    AnimationType,
+    PlayerConfigItem,
+    GamePlayersState,
+    GamePlayerMoveState,
+} from '@entityTypes/hexaQuest'
 import {
     getPathToMove,
     getPathToAttack,
@@ -27,6 +35,7 @@ import './HexaQuest.less'
 
 const HexaQuest = () => {
     const [grid, setGrid] = useState<Grid<Hex>>()
+    const [animations, setAnimations] = useState<Animation[]>([])
     const [playerMoveState, setPlayerMoveState] = useState<GamePlayerMoveState>(getInitialPlayerMoveState())
     const [playersGameState, setPlayersGameState] = useState<GamePlayersState>({
         players: [],
@@ -43,6 +52,30 @@ const HexaQuest = () => {
                 : undefined,
         [playersGameState.players, playersGameState.currentPlayerCoordinates],
     )
+
+    const runAnimation = (animation?: Animation) => {
+        if (!animation) return
+
+        return new Promise((resolve) => {
+            const updatedAnimation: Animation = {
+                ...animation,
+                onAnimationEnd: () => {
+                    setAnimations((state) =>
+                        state.filter(
+                            (stateAnimation) =>
+                                !(
+                                    stateAnimation.coordinates.q === animation.coordinates.q &&
+                                    stateAnimation.coordinates.r === animation.coordinates.r
+                                ),
+                        ),
+                    )
+                    resolve(null)
+                },
+            }
+
+            setAnimations((state) => [...state, updatedAnimation])
+        })
+    }
 
     const onPlayerMove = (hex: Hex) => {
         if (!playerMoveState.path.length) return
@@ -70,18 +103,24 @@ const HexaQuest = () => {
         })
     }
 
-    const onPlayerAttack = (hex: Hex) => {
-        setPlayerMoveState(getInitialPlayerMoveState())
-        setPlayersGameState({
-            ...playersGameState,
-            players: playersGameState.players.reduce<PlayerConfigItem[]>((memo, player) => {
+    const onPlayerAttack = async (hex: Hex) => {
+        const { newPlayersState, animations } = playersGameState.players.reduce<{
+            newPlayersState: PlayerConfigItem[]
+            animations: Animation[]
+        }>(
+            (memo, player) => {
                 const isCurrentPlayer =
                     player.coordinates.q === playersGameState.currentPlayerCoordinates?.q &&
                     player.coordinates.r === playersGameState.currentPlayerCoordinates?.r
                 const isAttackedPlayer = player.coordinates.q === hex.q && player.coordinates.r === hex.r
 
                 if (isCurrentPlayer) {
-                    memo.push({
+                    memo.animations.push({
+                        coordinates: { q: player.coordinates.q, r: player.coordinates.r },
+                        animationType: AnimationType.ATTACK,
+                    })
+
+                    memo.newPlayersState.push({
                         ...player,
                         config: {
                             ...player.config,
@@ -98,20 +137,34 @@ const HexaQuest = () => {
                         : player.config.remainingHealthPoints
 
                     if (remainingHealthPoints) {
-                        memo.push({
+                        memo.newPlayersState.push({
                             ...player,
                             config: {
                                 ...player.config,
                                 remainingHealthPoints,
                             },
                         })
+                    } else {
+                        memo.animations.push({
+                            coordinates: { q: player.coordinates.q, r: player.coordinates.r },
+                            animationType: AnimationType.DEATH,
+                        })
                     }
                 } else {
-                    memo.push(player)
+                    memo.newPlayersState.push(player)
                 }
 
                 return memo
-            }, []),
+            },
+            { newPlayersState: [], animations: [] },
+        )
+
+        await Promise.all(animations.map((animation) => runAnimation(animation)))
+
+        setPlayerMoveState(getInitialPlayerMoveState())
+        setPlayersGameState({
+            ...playersGameState,
+            players: newPlayersState,
         })
     }
 
@@ -239,6 +292,7 @@ const HexaQuest = () => {
         <div className="center-page hexa-quest__wrapper" style={{ position: 'relative' }}>
             <div style={{ position: 'absolute', top: '24px', right: '8px' }}>
                 <HexaQuestGUI
+                    animations={animations}
                     currentPlayer={currentPlayer}
                     playerMoveState={playerMoveState}
                     playersGameState={playersGameState}
@@ -257,6 +311,7 @@ const HexaQuest = () => {
                     {grid?.toArray()?.map((hex, index) => {
                         const rendererState = getHexagonRendererState({
                             hex,
+                            animations,
                             currentPlayer,
                             playerMoveState,
                             playersGameState,

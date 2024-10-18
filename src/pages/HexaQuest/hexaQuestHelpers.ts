@@ -1,24 +1,25 @@
 import { defineHex, Grid, Orientation, rectangle, spiral } from 'honeycomb-grid'
 import hexagonPathfinding from '@services/hexagon/hexagonPathfinding'
 import {
-    ATTACK_CONFIG_BY_PLAYER,
-    DEFAULT_HEX_CONFIG,
     HEXES_CONFIG,
-    MOVE_COST_BY_PLAYER_AND_HEX_TYPE,
     PLAYERS_CONFIG,
+    DEFAULT_HEX_CONFIG,
+    ATTACK_CONFIG_BY_PLAYER,
+    MOVE_COST_BY_PLAYER_AND_HEX_TYPE,
 } from './hexaQuestContants'
 import {
-    Coordinates,
-    GamePlayerMoveState,
     Hex,
-    HexagonRendererDataProps,
-    HexagonRendererState,
-    HexesConfigItem,
     HexType,
     MoveType,
-    PlayerConfigItem,
+    Animation,
     PlayerType,
+    Coordinates,
+    HexesConfigItem,
+    PlayerConfigItem,
+    GamePlayerMoveState,
+    HexagonRendererState,
     PlayerViewDirections,
+    HexagonRendererDataProps,
 } from '@entityTypes/hexaQuest'
 
 // hexagonPathfinding.runTesting()
@@ -46,9 +47,15 @@ export const sumPathMoveCost = (path?: Hex[]) => {
     return trimmedPath.reduce((memo, hex) => memo + (hex?.config?.moveCost || 0), 0) || Infinity
 }
 
-export const getPlayerByCoordinates = (players: PlayerConfigItem[], destination: Coordinates) => {
+export const getPlayerByCoordinates = (players: PlayerConfigItem[], coordinates: Coordinates) => {
     return players.find((player) => {
-        return destination.q === player.coordinates.q && destination.r === player.coordinates.r
+        return coordinates.q === player.coordinates.q && coordinates.r === player.coordinates.r
+    })
+}
+
+export const getAnimationByCoordinates = (animations: Animation[], coordinates: Coordinates) => {
+    return animations.find((animation) => {
+        return coordinates.q === animation.coordinates.q && coordinates.r === animation.coordinates.r
     })
 }
 
@@ -64,7 +71,7 @@ export const getPlayerViewDirection = (
         : PlayerViewDirections.RIGHT
 }
 
-export const getPlayerMoveRangeGrid = (grid: Grid<Hex>, player) => {
+export const getPlayerMoveRangeGrid = (grid: Grid<Hex>, player: PlayerConfigItem) => {
     return grid.traverse(
         spiral({
             radius: player.config.remainingMoveCost,
@@ -187,15 +194,18 @@ export const getInitialGameConfig = (): { grid: Grid<Hex>; players: PlayerConfig
 
 export const getHexagonRendererState = ({
     hex,
+    animations,
     currentPlayer,
     playerMoveState,
     playersGameState,
 }: HexagonRendererDataProps): HexagonRendererState => {
     const player = getPlayerByCoordinates(playersGameState?.players || [], hex)
+    const animation = getAnimationByCoordinates(animations, hex)
 
     return {
         hex,
         player,
+        animation,
         currentPlayer,
         playerMoveState,
         playersGameState,

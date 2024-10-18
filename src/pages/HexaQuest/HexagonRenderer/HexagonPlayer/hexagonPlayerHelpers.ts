@@ -1,19 +1,64 @@
-import { Hex, PlayerType } from '@entityTypes/hexaQuest'
-import ArcherIdle from '@assets/img/spritesheets/Archer_idle.png'
-import SpearmanIdle from '@assets/img/spritesheets/Spearman_idle.png'
+import { UseAnimationHookAnimationType } from '@hooks'
+import { AnimationType, Hex, PlayerType } from '@entityTypes/hexaQuest'
 
-export const getPlayerSpriteConfigByType = (playerType?: PlayerType) => {
-    const commonConfig = { frameWidth: 32, frameHeight: 32, duration: 1 }
+import ArcherIdle from '@assets/img/spritesheets/Archer_idle.png'
+import ArcherAttack from '@assets/img/spritesheets/Archer_attack.png'
+import SpearmanIdle from '@assets/img/spritesheets/Spearman_idle.png'
+import SpearmanDeath from '@assets/img/spritesheets/Spearman_death.png'
+import SpearmanAttack from '@assets/img/spritesheets/Spearman_attack.png'
+
+export const getPlayerSpriteConfigByTypeAndAnimation = (playerType: PlayerType, animationType?: AnimationType) => {
+    const commonConfig = { frameWidth: 32, frameHeight: 32, duration: 1, spriteOffsetX: 0 }
+
+    if (playerType === PlayerType.WARRIOR && animationType === AnimationType.ATTACK) {
+        return {
+            ...commonConfig,
+            sprite: SpearmanAttack,
+            frameCount: 10,
+            spriteOffsetX: 4,
+            hookAnimationType: UseAnimationHookAnimationType.SINGLE,
+        }
+    }
+
+    if (playerType === PlayerType.WARRIOR && animationType === AnimationType.DEATH) {
+        return {
+            ...commonConfig,
+            sprite: SpearmanDeath,
+            frameCount: 7,
+            spriteOffsetX: 4,
+            hookAnimationType: UseAnimationHookAnimationType.SINGLE,
+        }
+    }
 
     if (playerType === PlayerType.WARRIOR) {
-        return { ...commonConfig, sprite: SpearmanIdle, frameCount: 5, spriteOffsetX: 4 }
+        return {
+            ...commonConfig,
+            sprite: SpearmanIdle,
+            frameCount: 5,
+            spriteOffsetX: 4,
+            hookAnimationType: UseAnimationHookAnimationType.INFINITE,
+        }
+    }
+
+    if (playerType === PlayerType.ARCHER && animationType === AnimationType.ATTACK) {
+        return {
+            ...commonConfig,
+            sprite: ArcherAttack,
+            frameCount: 9,
+            hookAnimationType: UseAnimationHookAnimationType.SINGLE,
+        }
     }
 
     if (playerType === PlayerType.ARCHER) {
-        return { ...commonConfig, sprite: ArcherIdle, frameCount: 5, spriteOffsetX: 0 }
+        return {
+            ...commonConfig,
+            sprite: ArcherIdle,
+            frameCount: 5,
+            hookAnimationType: UseAnimationHookAnimationType.INFINITE,
+        }
     }
 
-    return { ...commonConfig, sprite: null, frameCount: 0, spriteOffsetX: 0 }
+    return { ...commonConfig, sprite: null, frameCount: 0, hookAnimationType: UseAnimationHookAnimationType.STATIC }
 }
 
 export const calculateHexagonPlayerImageSize = (hex: Hex, options: { offsetX: number }) => {

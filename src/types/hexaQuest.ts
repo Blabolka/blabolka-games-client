@@ -78,7 +78,20 @@ export type GamePlayersState = {
 }
 
 // Renderer types
+export enum AnimationType {
+    IDLE = 'idle',
+    DEATH = 'death',
+    ATTACK = 'attack',
+}
+
+export type Animation = {
+    coordinates: Coordinates
+    animationType: AnimationType
+    onAnimationEnd?: () => void
+}
+
 export type RenderDataProps = {
+    animations: Animation[]
     currentPlayer?: PlayerConfigItem
     playersGameState: GamePlayersState
     playerMoveState: GamePlayerMoveState
@@ -90,6 +103,7 @@ export type HexagonRendererDataProps = RenderDataProps & {
 
 export type HexagonRendererState = {
     hex: Hex
+    animation?: Animation
     player?: PlayerConfigItem
     currentPlayer?: PlayerConfigItem
     playersGameState: GamePlayersState
