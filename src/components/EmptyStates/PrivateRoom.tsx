@@ -6,7 +6,7 @@ import { LoadingButton } from '@mui/lab'
 import { IconButton, TextField } from '@mui/material'
 import { Visibility, VisibilityOff } from '@mui/icons-material'
 
-import LockedRoomImage from '@assets/img/private-room-icon.svg'
+import LockedRoomImage from '@assets/img/resources/private-room-icon.svg'
 
 type PrivateRoomProps = {
     roomId: string

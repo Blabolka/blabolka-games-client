@@ -5,7 +5,7 @@ import { setModalWindow } from '@redux-actions'
 
 import ModalRoot from '@components/Modals/ModalRoot'
 
-import TicTacToeImage from '@assets/img/tic-tac-toe-preview.svg'
+import TicTacToeImage from '@assets/img/resources/tic-tac-toe-preview.svg'
 
 import { ModalTypesEnum } from '@entityTypes/modals'
 

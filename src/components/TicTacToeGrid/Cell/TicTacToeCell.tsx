@@ -12,8 +12,8 @@ import { TicTacToeFinishGameChecker } from '@services/ticTacToe/TicTacToeFinishG
 
 import socket from '@lib/socket'
 
-import CloseIcon from '@assets/img/close-icon.svg'
-import CircleIcon from '@assets/img/circle-icon.svg'
+import CloseIcon from '@assets/img/resources/close-icon.svg'
+import CircleIcon from '@assets/img/resources/circle-icon.svg'
 
 type TicTacToeCellProps = {
     ticTacToeCell: CellFullData

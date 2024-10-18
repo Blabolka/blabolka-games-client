@@ -13,6 +13,7 @@ module.exports = (env, arguments) => {
             path: path.resolve(__dirname, 'dist'),
             filename: '[name].[contenthash].js',
             chunkFilename: '[name].[chunkhash].js',
+            assetModuleFilename: 'img/[name]-[hash][ext][query]',
             publicPath: '/',
         },
         resolve: {
@@ -75,7 +76,13 @@ module.exports = (env, arguments) => {
                 },
                 {
                     test: /\.(png|jp(e*)g|gif|svg)$/i,
+                    type: 'asset/inline',
+                    include: /src\/assets\/img\/inline\//,
+                },
+                {
+                    test: /\.(png|jp(e*)g|gif|svg)$/i,
                     type: 'asset/resource',
+                    exclude: /src\/assets\/img\/inline\//
                 },
             ],
         },

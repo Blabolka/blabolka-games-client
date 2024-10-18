@@ -289,7 +289,13 @@ const HexaQuest = () => {
     }, [currentPlayer, playerMoveState.moveType, playersGameState.players])
 
     return (
-        <div className="center-page hexa-quest__wrapper" style={{ position: 'relative' }}>
+        <div
+            className="center-page hexa-quest__wrapper"
+            style={{
+                position: 'relative',
+                // ...(animations.length ? { pointerEvents: 'none' } : {}),
+            }}
+        >
             <div style={{ position: 'absolute', top: '24px', right: '8px' }}>
                 <HexaQuestGUI
                     animations={animations}

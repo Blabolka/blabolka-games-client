@@ -1,6 +1,6 @@
 import React from 'react'
 
-import RoomImage from '@assets/img/room-icon.svg'
+import RoomImage from '@assets/img/resources/room-icon.svg'
 
 const FullRoom = () => {
     return (

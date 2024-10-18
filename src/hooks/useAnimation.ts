@@ -21,22 +21,30 @@ export const useAnimation = ({
 }: UseAnimationHookAnimationProps) => {
     const [currentFrame, setCurrentFrame] = useState(0)
 
-    const runStaticAnimation = () => {
+    const resetAnimation = () => {
         setCurrentFrame(0)
+    }
+
+    const runStaticAnimation = () => {
+        resetAnimation()
         onAnimationEnd?.()
     }
 
     const runSingleAnimation = () => {
+        resetAnimation()
         const singleFrameDurationTime = (duration * 1000) / frameCount
-        const interval = setInterval(() => {
-            setCurrentFrame((prevFrame) => {
-                const isCurrentFrameLast = prevFrame + 1 === frameCount
-                if (isCurrentFrameLast) {
-                    clearInterval(interval)
-                    onAnimationEnd?.()
-                    return prevFrame
-                }
 
+        let lastFrame = 0
+        const interval = setInterval(() => {
+            const isCurrentFrameLast = lastFrame + 1 === frameCount
+            if (isCurrentFrameLast) {
+                clearInterval(interval)
+                onAnimationEnd?.()
+                return
+            }
+
+            setCurrentFrame((prevFrame) => {
+                lastFrame = prevFrame + 1
                 return prevFrame + 1
             })
         }, singleFrameDurationTime)
@@ -44,6 +52,8 @@ export const useAnimation = ({
     }
 
     const runInfiniteAnimation = () => {
+        resetAnimation()
+
         const singleFrameDurationTime = (duration * 1000) / frameCount
         return setInterval(() => {
             setCurrentFrame((prevFrame) => (prevFrame + 1) % frameCount)
@@ -56,19 +66,16 @@ export const useAnimation = ({
                 runStaticAnimation()
                 return undefined
             case UseAnimationHookAnimationType.SINGLE:
-                return runSingleAnimation() || undefined
+                return runSingleAnimation()
             case UseAnimationHookAnimationType.INFINITE:
                 return runInfiniteAnimation()
         }
     }
 
     useEffect(() => {
-        setCurrentFrame(0)
-
         const interval = runAnimationByType(animationType)
 
         return () => {
-            onAnimationEnd?.()
             clearInterval(interval)
         }
     }, [animationType, frameCount, duration])

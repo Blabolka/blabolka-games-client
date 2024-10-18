@@ -1,11 +1,11 @@
 import { UseAnimationHookAnimationType } from '@hooks'
 import { AnimationType, Hex, PlayerType } from '@entityTypes/hexaQuest'
 
-import ArcherIdle from '@assets/img/spritesheets/Archer_idle.png'
-import ArcherAttack from '@assets/img/spritesheets/Archer_attack.png'
-import SpearmanIdle from '@assets/img/spritesheets/Spearman_idle.png'
-import SpearmanDeath from '@assets/img/spritesheets/Spearman_death.png'
-import SpearmanAttack from '@assets/img/spritesheets/Spearman_attack.png'
+import ArcherIdle from '@assets/img/inline/spritesheets/Archer_idle.png'
+import ArcherAttack from '@assets/img/inline/spritesheets/Archer_attack.png'
+import SpearmanIdle from '@assets/img/inline/spritesheets/Spearman_idle.png'
+import SpearmanDeath from '@assets/img/inline/spritesheets/Spearman_death.png'
+import SpearmanAttack from '@assets/img/inline/spritesheets/Spearman_attack.png'
 
 export const getPlayerSpriteConfigByTypeAndAnimation = (playerType: PlayerType, animationType?: AnimationType) => {
     const commonConfig = { frameWidth: 32, frameHeight: 32, duration: 1, spriteOffsetX: 0 }

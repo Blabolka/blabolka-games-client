@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 
 import './Header.less'
 
-import ControllerLogo from '@assets/img/controller-logo-icon.svg'
+import ControllerLogo from '@assets/img/resources/controller-logo-icon.svg'
 
 const Header = () => {
     return (

@@ -1,8 +1,8 @@
 import { Hex, HexType } from '@entityTypes/hexaQuest'
-import BushImage from '@assets/img/hexagons/bushes.png'
-import GrassImage from '@assets/img/hexagons/grass.png'
-import WaterImage from '@assets/img/hexagons/water.png'
-import ForestImage from '@assets/img/hexagons/forest.png'
+import BushImage from '@assets/img/resources/hexagons/bushes.png'
+import GrassImage from '@assets/img/resources/hexagons/grass.png'
+import WaterImage from '@assets/img/resources/hexagons/water.png'
+import ForestImage from '@assets/img/resources/hexagons/forest.png'
 
 export const getHexagonFieldImageByType = (hexType?: HexType) => {
     switch (hexType) {
