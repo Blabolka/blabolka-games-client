@@ -311,9 +311,13 @@ const HexaQuest = () => {
             <div className="column align-center" style={{ width: '100%', overflow: 'auto' }}>
                 <HexagonGrid
                     className="hexagon-grid"
-                    width={Number(grid?.pixelWidth)}
-                    height={Number(grid?.pixelHeight) * 1.07}
-                    viewBox={`0 0 ${Number(grid?.pixelWidth)} ${Number(grid?.pixelHeight)}`}
+                    width={grid?.pixelWidth}
+                    height={grid?.pixelHeight ? grid?.pixelHeight * 1.07 : undefined}
+                    viewBox={
+                        grid?.pixelWidth && grid?.pixelHeight
+                            ? `0 0 ${grid?.pixelWidth} ${grid?.pixelHeight}`
+                            : undefined
+                    }
                     onMouseLeave={() => onHexagonHover(undefined)}
                 >
                     {grid?.toArray()?.map((hex, index) => {
