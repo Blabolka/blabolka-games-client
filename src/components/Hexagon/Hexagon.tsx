@@ -13,7 +13,7 @@ const Hexagon = ({ corners, children, ...props }: HexagonProps) => {
 
     return (
         <>
-            <polygon points={hexPoints} fill="#FFFFFF" stroke="#000000" strokeWidth="2" {...props} />
+            <polygon points={hexPoints} fill="#FFFFFF" stroke="#000000" strokeWidth="1" {...props} />
             {children}
         </>
     )

@@ -8,6 +8,7 @@ import HexaQuestGUI from '@pages/HexaQuest/HexaQuestGUI/HexaQuestGUI'
 import HexagonInfoTooltip from './HexagonInfoTooltip/HexagonInfoTooltip'
 
 import { Grid } from 'honeycomb-grid'
+import { calculateAdaptiveSvgStrokeWidth, StrokeWidthFactorType } from '@utils/components'
 import {
     Hex,
     MoveType,
@@ -310,8 +311,9 @@ const HexaQuest = () => {
             <div className="column align-center" style={{ width: '100%', overflow: 'auto' }}>
                 <HexagonGrid
                     className="hexagon-grid"
-                    width={grid?.pixelWidth}
-                    height={grid?.pixelHeight}
+                    width={Number(grid?.pixelWidth)}
+                    height={Number(grid?.pixelHeight) * 1.07}
+                    viewBox={`0 0 ${Number(grid?.pixelWidth)} ${Number(grid?.pixelHeight)}`}
                     onMouseLeave={() => onHexagonHover(undefined)}
                 >
                     {grid?.toArray()?.map((hex, index) => {
@@ -327,9 +329,13 @@ const HexaQuest = () => {
                             <g key={index} aria-label="Hexagon Group">
                                 <HexagonInfoTooltip rendererState={rendererState}>
                                     <Hexagon
-                                        corners={hex.corners}
                                         className="hexagon"
                                         aria-label="Hexagon Shape"
+                                        corners={hex.corners}
+                                        strokeWidth={calculateAdaptiveSvgStrokeWidth(
+                                            hex.height,
+                                            StrokeWidthFactorType.SMALL,
+                                        )}
                                         onMouseEnter={() => onHexagonHover(hex)}
                                         onClick={
                                             rendererState?.isHexAccessibleByPlayer
@@ -342,7 +348,13 @@ const HexaQuest = () => {
                             </g>
                         )
                     })}
-                    <HexagonPath hexes={playerMoveState?.path || []} />
+                    <HexagonPath
+                        hexes={playerMoveState?.path || []}
+                        strokeWidth={calculateAdaptiveSvgStrokeWidth(
+                            grid?.getHex({ q: 0, r: 0 })?.height,
+                            StrokeWidthFactorType.LARGE,
+                        )}
+                    />
                 </HexagonGrid>
             </div>
         </div>
