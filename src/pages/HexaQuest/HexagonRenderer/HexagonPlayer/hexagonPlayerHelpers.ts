@@ -2,6 +2,7 @@ import { UseAnimationHookAnimationType } from '@hooks'
 import { AnimationType, Hex, PlayerType } from '@entityTypes/hexaQuest'
 
 import ArcherIdle from '@assets/img/inline/spritesheets/Archer_idle.png'
+import ArcherDeath from '@assets/img/inline/spritesheets/Archer_death.png'
 import ArcherAttack from '@assets/img/inline/spritesheets/Archer_attack.png'
 import SpearmanIdle from '@assets/img/inline/spritesheets/Spearman_idle.png'
 import SpearmanDeath from '@assets/img/inline/spritesheets/Spearman_death.png'
@@ -45,6 +46,15 @@ export const getPlayerSpriteConfigByTypeAndAnimation = (playerType: PlayerType, 
             ...commonConfig,
             sprite: ArcherAttack,
             frameCount: 9,
+            hookAnimationType: UseAnimationHookAnimationType.SINGLE,
+        }
+    }
+
+    if (playerType === PlayerType.ARCHER && animationType === AnimationType.DEATH) {
+        return {
+            ...commonConfig,
+            sprite: ArcherDeath,
+            frameCount: 7,
             hookAnimationType: UseAnimationHookAnimationType.SINGLE,
         }
     }
