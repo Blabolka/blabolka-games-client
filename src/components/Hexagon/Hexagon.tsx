@@ -1,15 +1,15 @@
 import React from 'react'
 
-import { HexagonRendererState } from '@entityTypes/hexaQuest'
+import { Hex } from '@entityTypes/hexaQuest'
 
 type AdditionalHexagonProps = {
-    rendererState: HexagonRendererState
+    hex: Hex
 }
 
 export type HexagonProps = AdditionalHexagonProps & React.SVGProps<SVGPolygonElement>
 
-const Hexagon = ({ rendererState, children, ...props }: HexagonProps) => {
-    const hexPoints = rendererState.hex.corners.map(({ x, y }) => `${x},${y}`).join(' ')
+const Hexagon = ({ hex, children, ...props }: HexagonProps) => {
+    const hexPoints = hex.corners.map(({ x, y }) => `${x},${y}`).join(' ')
 
     return (
         <>

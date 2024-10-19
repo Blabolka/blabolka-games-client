@@ -20,6 +20,7 @@ const HexagonField = ({ rendererState }: HexagonFieldProps) => {
             y={y}
             width={width}
             height={height}
+            aria-label="Hexagon Field Image"
             image={getHexagonFieldImageByType(hex.config?.type)}
             className={classnames({
                 hexagon__inaccessible: !rendererState.isHexAccessibleByPlayer,

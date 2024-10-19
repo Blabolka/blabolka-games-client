@@ -11,7 +11,7 @@ export type HexagonRendererProps = {
 
 const HexagonRenderer = ({ rendererState }: HexagonRendererProps) => {
     return (
-        <g>
+        <g aria-label="Hexagon Renderer">
             <HexagonField rendererState={rendererState} />
             <HexagonPlayer rendererState={rendererState} />
         </g>

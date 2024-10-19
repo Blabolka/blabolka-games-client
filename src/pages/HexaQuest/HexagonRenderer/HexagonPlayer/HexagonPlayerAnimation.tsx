@@ -36,7 +36,7 @@ const HexagonPlayer = ({ rendererState }: HexagonCharacterProps) => {
     const offsetX = currentFrame * width
 
     return (
-        <g>
+        <g aria-label="Hexagon Player Animation">
             <defs>
                 <clipPath id={elementId}>
                     <rect x={x} y={y} width={width} height={height} />

@@ -29,7 +29,7 @@ const HexagonInfoTooltip = ({ rendererState, ...props }: HexagonInfoTooltipProps
             disableInteractive={true}
             title={shouldShowTooltip ? <HexagonInfoTooltipMessages rendererState={rendererState} /> : null}
         >
-            <g>{props.children}</g>
+            <g aria-label="Hexagon Tooltip Info">{props.children}</g>
         </Tooltip>
     )
 }

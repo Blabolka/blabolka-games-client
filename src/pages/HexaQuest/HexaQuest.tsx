@@ -293,7 +293,7 @@ const HexaQuest = () => {
             className="center-page hexa-quest__wrapper"
             style={{
                 position: 'relative',
-                // ...(animations.length ? { pointerEvents: 'none' } : {}),
+                ...(animations.length ? { pointerEvents: 'none' } : {}),
             }}
         >
             <div style={{ position: 'absolute', top: '24px', right: '8px' }}>
@@ -324,17 +324,21 @@ const HexaQuest = () => {
                         })
 
                         return (
-                            <React.Fragment key={index}>
+                            <g key={index} aria-label="Hexagon Group">
                                 <HexagonInfoTooltip rendererState={rendererState}>
                                     <Hexagon
-                                        rendererState={rendererState}
-                                        onClick={() => onHexagonClick(hex)}
+                                        hex={hex}
+                                        aria-label="Hexagon Shape"
                                         onMouseEnter={() => onHexagonHover(hex)}
-                                    >
-                                        <HexagonRenderer rendererState={rendererState} />
-                                    </Hexagon>
+                                        onClick={
+                                            rendererState?.isHexAccessibleByPlayer
+                                                ? () => onHexagonClick(hex)
+                                                : () => {}
+                                        }
+                                    />
                                 </HexagonInfoTooltip>
-                            </React.Fragment>
+                                <HexagonRenderer rendererState={rendererState} />
+                            </g>
                         )
                     })}
                     <HexagonPath hexes={playerMoveState?.path || []} />
