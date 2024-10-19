@@ -5,6 +5,7 @@ import { setModalWindow } from '@redux-actions'
 
 import ModalRoot from '@components/Modals/ModalRoot'
 
+import HexaQuestImage from '@assets/img/resources/hexa-quest-preview.png'
 import TicTacToeImage from '@assets/img/resources/tic-tac-toe-preview.svg'
 
 import { ModalTypesEnum } from '@entityTypes/modals'
@@ -23,7 +24,7 @@ const MainPage = () => {
         },
         {
             name: 'HEXA-QUEST',
-            image: TicTacToeImage,
+            image: HexaQuestImage,
             onClick: () => navigate('/hexa-quest'),
         },
     ]
