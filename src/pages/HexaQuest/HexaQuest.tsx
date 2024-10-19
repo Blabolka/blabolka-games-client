@@ -327,7 +327,8 @@ const HexaQuest = () => {
                             <g key={index} aria-label="Hexagon Group">
                                 <HexagonInfoTooltip rendererState={rendererState}>
                                     <Hexagon
-                                        hex={hex}
+                                        corners={hex.corners}
+                                        className="hexagon"
                                         aria-label="Hexagon Shape"
                                         onMouseEnter={() => onHexagonHover(hex)}
                                         onClick={

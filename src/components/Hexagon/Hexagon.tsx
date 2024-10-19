@@ -1,15 +1,15 @@
 import React from 'react'
 
-import { Hex } from '@entityTypes/hexaQuest'
+import { Point } from 'honeycomb-grid'
 
 type AdditionalHexagonProps = {
-    hex: Hex
+    corners: Point[]
 }
 
 export type HexagonProps = AdditionalHexagonProps & React.SVGProps<SVGPolygonElement>
 
-const Hexagon = ({ hex, children, ...props }: HexagonProps) => {
-    const hexPoints = hex.corners.map(({ x, y }) => `${x},${y}`).join(' ')
+const Hexagon = ({ corners, children, ...props }: HexagonProps) => {
+    const hexPoints = corners.map(({ x, y }) => `${x},${y}`).join(' ')
 
     return (
         <>
