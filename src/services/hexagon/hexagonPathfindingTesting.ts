@@ -46,11 +46,17 @@ export const calculatePathToEveryNode = (grid: Grid<Hex>, startHexagon?: Hex) =>
             })
 
             return {
-                aStar: { time: memo.aStar.time + aStar.time, nodes: 0 },
-                dijkstra: { time: memo.dijkstra.time + dijkstra.time, nodes: 0 },
+                aStar: {
+                    time: memo.aStar.time + aStar.time,
+                    processedNodes: memo.aStar.processedNodes + aStar.processedNodes,
+                },
+                dijkstra: {
+                    time: memo.dijkstra.time + dijkstra.time,
+                    processedNodes: memo.dijkstra.processedNodes + dijkstra.processedNodes,
+                },
             }
         },
-        { aStar: { time: 0, nodes: 0 }, dijkstra: { time: 0, nodes: 0 } },
+        { aStar: { time: 0, processedNodes: 0 }, dijkstra: { time: 0, processedNodes: 0 } },
     )
 }
 
@@ -101,7 +107,7 @@ export const runTesting = () => {
     }
 
     const Tile = defineHex({ dimensions: 40, origin: 'topLeft', orientation: Orientation.FLAT })
-    const testingGridRadius = [6]
+    const testingGridRadius = [4, 6, 8, 10]
     const grids = [
         { label: 'Normal Move Cost', type: GridType.NORMAL },
         { label: 'Random Move Cost', type: GridType.RANDOM },
@@ -138,13 +144,16 @@ export const runTesting = () => {
     })
 
     const timeToFindPathToEveryNodeFromCenter = parseCalculationResultToTable(calculationResults, 'time')
-    const iteratedNodesToFindPathToEveryNodeFromCenter = parseCalculationResultToTable(calculationResults, 'nodes')
+    const processedNodesToFindPathToEveryNodeFromCenter = parseCalculationResultToTable(
+        calculationResults,
+        'processedNodes',
+    )
 
     console.log('\n\n\n')
     console.log('Time to find path to every node from center:')
     console.table(timeToFindPathToEveryNodeFromCenter)
 
     console.log('\n\n\n')
-    console.log('Time to find path to every node from center:')
-    console.table(iteratedNodesToFindPathToEveryNodeFromCenter)
+    console.log('Processed nodes to find path to every node from center:')
+    console.table(processedNodesToFindPathToEveryNodeFromCenter)
 }

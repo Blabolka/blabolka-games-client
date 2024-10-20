@@ -22,7 +22,7 @@ import {
     HexagonRendererDataProps,
 } from '@entityTypes/hexaQuest'
 
-// hexagonPathfinding.runTesting()
+hexagonPathfinding.runTesting()
 
 export const getConfigByHex = (config: HexesConfigItem[], hex: Hex) => {
     const configItem = config.find(({ coordinates }) => hex.equals(coordinates))

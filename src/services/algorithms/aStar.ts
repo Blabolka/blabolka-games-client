@@ -5,7 +5,8 @@ export const findPath = (
     start: string,
     goal: string,
     estimateFromNodeToGoal: (currentNode: string) => number,
-): { path: string[] } => {
+): { path: string[]; processedNodes: number } => {
+    let processedNodes = 0
     const distances = new Map()
     const heap = new Heap<string>((a, b) => {
         const aData = distances.get(a)
@@ -26,6 +27,8 @@ export const findPath = (
         if (!currentNode) continue
         if (currentNode === goal) break
 
+        processedNodes++
+
         const { cost: currentCost, path: currentPath } = distances.get(currentNode)
         const neighbors = graph[currentNode]
 
@@ -43,5 +46,5 @@ export const findPath = (
     }
 
     const { path } = distances.get(goal)
-    return { path }
+    return { path, processedNodes }
 }

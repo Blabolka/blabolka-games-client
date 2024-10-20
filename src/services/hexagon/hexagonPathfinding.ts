@@ -15,6 +15,7 @@ export enum GridType {
 export type PathfindingAlgorithmResult = {
     path: Hex[]
     time: number
+    processedNodes: number
 }
 
 export type PathfindingAlgorithmRequiredData = {
@@ -66,6 +67,7 @@ const hexagonPathfinding = () => {
         return {
             path: path || [],
             time: Date.now() - started,
+            processedNodes: 0,
         }
     }
 
@@ -83,6 +85,7 @@ const hexagonPathfinding = () => {
         return {
             path,
             time,
+            processedNodes: 0,
         }
     }
 
@@ -90,10 +93,15 @@ const hexagonPathfinding = () => {
         const graph = getWeightedGraphFromGrid(grid)
 
         const started = Date.now()
-        const { path: shortestPath } = customAStarFindPath(graph, start.toString(), goal.toString(), (tile) => {
-            const hex = grid.getHex(parseHexStringCoordinates(tile))
-            return hex ? grid.distance(hex, goal) : Infinity
-        })
+        const { path: shortestPath, processedNodes } = customAStarFindPath(
+            graph,
+            start.toString(),
+            goal.toString(),
+            (tile) => {
+                const hex = grid.getHex(parseHexStringCoordinates(tile))
+                return hex ? grid.distance(hex, goal) : Infinity
+            },
+        )
         const time = Date.now() - started
 
         const path = shortestPath.reduce<Hex[]>((memo, hexString: string) => {
@@ -104,6 +112,7 @@ const hexagonPathfinding = () => {
         return {
             path,
             time,
+            processedNodes,
         }
     }
 
@@ -113,7 +122,7 @@ const hexagonPathfinding = () => {
         const goalId = goal.toString()
 
         const started = Date.now()
-        const { path: shortestPath } = customDijktraFindPath(graph, startId, goalId)
+        const { path: shortestPath, processedNodes } = customDijktraFindPath(graph, startId, goalId)
         const time = Date.now() - started
 
         const path = shortestPath.reduce<Hex[]>((memo, hexString: string) => {
@@ -124,6 +133,7 @@ const hexagonPathfinding = () => {
         return {
             path,
             time,
+            processedNodes,
         }
     }
 
