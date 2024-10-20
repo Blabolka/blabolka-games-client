@@ -71,7 +71,7 @@ const createPlayersConfig = (): PlayerConfigItem[] => {
 }
 
 export const NUMBER_OF_TILES_PER_TURN_BY_PLAYER = {
-    [PlayerType.WARRIOR]: 5,
+    [PlayerType.WARRIOR]: 4,
     [PlayerType.ARCHER]: 3,
 }
 
