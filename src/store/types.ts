@@ -8,6 +8,12 @@ export enum TicTacToeTypes {
     SET_IS_RESTART_BUTTON_HIDE = 'ticTacToe/setIsRestartButtonHide',
 }
 
+export enum HexaQuestTypes {
+    UPDATE_PLAYERS_GAME_STATE = 'hexaQuest/updatePlayersGameState',
+    UPDATE_PLAYER_MOVE_STATE = 'hexaQuest/updatePlayerMoveState',
+    RESET_PLAYER_MOVE_STATE = 'hexaQuest/resetPlayerMoveState',
+}
+
 export enum ModalWindowTypes {
     SET_MODAL_WINDOW = 'modalWindow/setModalWindow',
 }

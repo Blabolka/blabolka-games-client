@@ -16,13 +16,12 @@ import {
     Coordinates,
     HexesConfigItem,
     PlayerConfigItem,
-    GamePlayerMoveState,
     HexagonRendererState,
     PlayerViewDirections,
     HexagonRendererDataProps,
 } from '@entityTypes/hexaQuest'
 
-hexagonPathfinding.runTesting()
+// hexagonPathfinding.runTesting()
 
 export const getConfigByHex = (config: HexesConfigItem[], hex: Hex) => {
     const configItem = config.find(({ coordinates }) => hex.equals(coordinates))
@@ -180,12 +179,6 @@ export const getPathToAttack = (grid: Grid<Hex>, currentPlayer: PlayerConfigItem
 
     return startHexagon && goalHexagon ? [startHexagon, goalHexagon] : []
 }
-
-export const getInitialPlayerMoveState = (): GamePlayerMoveState => ({
-    moveType: MoveType.MOVE,
-    path: [],
-    availableHexesToMove: [],
-})
 
 export const getInitialGameConfig = (): { grid: Grid<Hex>; players: PlayerConfigItem[] } => {
     const Tile = defineHex({ dimensions: 40, origin: 'topLeft', orientation: Orientation.FLAT })

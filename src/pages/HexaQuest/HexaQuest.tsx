@@ -1,4 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+import { updatePlayerMoveState, updatePlayersGameState, resetPlayerMoveState } from '@redux-actions'
+import { getPlayerMoveState, getPlayersGameState } from '@redux-selectors'
 
 import Hexagon from '@components/Hexagon/Hexagon'
 import HexagonPath from '@components/HexagonPath/HexagonPath'
@@ -9,15 +12,7 @@ import HexagonInfoTooltip from './HexagonInfoTooltip/HexagonInfoTooltip'
 
 import { Grid } from 'honeycomb-grid'
 import { calculateAdaptiveSvgStrokeWidth, StrokeWidthFactorType } from '@utils/components'
-import {
-    Hex,
-    MoveType,
-    Animation,
-    AnimationType,
-    PlayerConfigItem,
-    GamePlayersState,
-    GamePlayerMoveState,
-} from '@entityTypes/hexaQuest'
+import { Hex, MoveType, Animation, AnimationType, PlayerConfigItem } from '@entityTypes/hexaQuest'
 import {
     getPathToMove,
     getPathToAttack,
@@ -27,7 +22,6 @@ import {
     getPlayerByCoordinates,
     getHexagonRendererState,
     getAvailableHexesToMove,
-    getInitialPlayerMoveState,
     getAvailableHexesToAttack,
     getAttackConfigByPlayerAndType,
 } from './hexaQuestHelpers'
@@ -35,13 +29,13 @@ import {
 import './HexaQuest.less'
 
 const HexaQuest = () => {
+    const dispatch = useDispatch()
+
+    const playerMoveState = useSelector(getPlayerMoveState)
+    const playersGameState = useSelector(getPlayersGameState)
+
     const [grid, setGrid] = useState<Grid<Hex>>()
     const [animations, setAnimations] = useState<Animation[]>([])
-    const [playerMoveState, setPlayerMoveState] = useState<GamePlayerMoveState>(getInitialPlayerMoveState())
-    const [playersGameState, setPlayersGameState] = useState<GamePlayersState>({
-        players: [],
-        currentPlayerCoordinates: undefined,
-    })
 
     const currentPlayer = useMemo(
         (): PlayerConfigItem | undefined =>
@@ -84,31 +78,29 @@ const HexaQuest = () => {
         const newPlayerCoordinates = { q: hex.q, r: hex.r }
         const pathCost = sumPathMoveCost(playerMoveState.path)
 
-        setPlayerMoveState(getInitialPlayerMoveState())
-        setPlayersGameState({
-            ...playersGameState,
-            currentPlayerCoordinates: newPlayerCoordinates,
-            players: playersGameState.players.map((player) =>
-                player.coordinates.q === playersGameState.currentPlayerCoordinates?.q &&
-                player.coordinates.r === playersGameState.currentPlayerCoordinates?.r
-                    ? {
-                          ...player,
-                          coordinates: newPlayerCoordinates,
-                          config: {
-                              ...player.config,
-                              remainingMoveCost: player.config.remainingMoveCost - pathCost,
-                          },
-                      }
-                    : player,
-            ),
-        })
+        dispatch(resetPlayerMoveState())
+        dispatch(
+            updatePlayersGameState({
+                currentPlayerCoordinates: newPlayerCoordinates,
+                players: playersGameState.players.map((player) =>
+                    player.coordinates.q === playersGameState.currentPlayerCoordinates?.q &&
+                    player.coordinates.r === playersGameState.currentPlayerCoordinates?.r
+                        ? {
+                              ...player,
+                              coordinates: newPlayerCoordinates,
+                              config: {
+                                  ...player.config,
+                                  remainingMoveCost: player.config.remainingMoveCost - pathCost,
+                              },
+                          }
+                        : player,
+                ),
+            }),
+        )
     }
 
     const onPlayerAttack = async (hex: Hex) => {
-        const { newPlayersState, animations } = playersGameState.players.reduce<{
-            newPlayersState: PlayerConfigItem[]
-            animations: Animation[]
-        }>(
+        const { newPlayersState, animations } = playersGameState.players.reduce(
             (memo, player) => {
                 const isCurrentPlayer =
                     player.coordinates.q === playersGameState.currentPlayerCoordinates?.q &&
@@ -162,11 +154,8 @@ const HexaQuest = () => {
 
         await Promise.all(animations.map((animation) => runAnimation(animation)))
 
-        setPlayerMoveState(getInitialPlayerMoveState())
-        setPlayersGameState({
-            ...playersGameState,
-            players: newPlayersState,
-        })
+        dispatch(resetPlayerMoveState())
+        dispatch(updatePlayersGameState({ players: newPlayersState }))
     }
 
     const onHexagonClick = (hex: Hex) => {
@@ -182,14 +171,11 @@ const HexaQuest = () => {
     }
 
     const onPlayerAttackStart = (moveType: MoveType) => {
-        setPlayerMoveState((state) => ({
-            ...state,
-            moveType,
-        }))
+        dispatch(updatePlayerMoveState({ moveType }))
     }
 
     const onPlayerMoveCancel = () => {
-        setPlayerMoveState(getInitialPlayerMoveState())
+        dispatch(resetPlayerMoveState())
     }
 
     const onPlayerFinishMove = () => {
@@ -200,30 +186,32 @@ const HexaQuest = () => {
             )
         })
 
-        setPlayerMoveState(getInitialPlayerMoveState())
-        setPlayersGameState({
-            ...playersGameState,
-            currentPlayerCoordinates: (playersGameState.players[currentPlayerIndex + 1] || playersGameState.players[0])
-                .coordinates,
-            players: playersGameState.players.map((player) =>
-                player.coordinates.q === playersGameState.currentPlayerCoordinates?.q &&
-                player.coordinates.r === playersGameState.currentPlayerCoordinates?.r
-                    ? {
-                          ...player,
-                          config: {
-                              ...player.config,
-                              remainingActions: player.config.numberOfActionsPerTurn,
-                              remainingMoveCost: player.config.numberOfMoveCostPerTurn,
-                          },
-                      }
-                    : player,
-            ),
-        })
+        dispatch(resetPlayerMoveState())
+        dispatch(
+            updatePlayersGameState({
+                currentPlayerCoordinates: (
+                    playersGameState.players[currentPlayerIndex + 1] || playersGameState.players[0]
+                ).coordinates,
+                players: playersGameState.players.map((player) =>
+                    player.coordinates.q === playersGameState.currentPlayerCoordinates?.q &&
+                    player.coordinates.r === playersGameState.currentPlayerCoordinates?.r
+                        ? {
+                              ...player,
+                              config: {
+                                  ...player.config,
+                                  remainingActions: player.config.numberOfActionsPerTurn,
+                                  remainingMoveCost: player.config.numberOfMoveCostPerTurn,
+                              },
+                          }
+                        : player,
+                ),
+            }),
+        )
     }
 
     const onHexagonHover = (hex?: Hex) => {
         const updatePath = (path: Hex[]) => {
-            setPlayerMoveState((state) => ({ ...state, path }))
+            dispatch(updatePlayerMoveState({ path }))
         }
 
         if (!grid || !hex || !currentPlayer) {
@@ -242,51 +230,53 @@ const HexaQuest = () => {
                 ? getPathToMove(grid, playersGameState.players, currentPlayer, hex)
                 : getPathToAttack(grid, currentPlayer, hex),
         )
-        setPlayersGameState((state) => ({
-            ...state,
-            players: playersGameState.players.reduce<PlayerConfigItem[]>((memo, player) => {
-                const isCurrentPlayer =
-                    player.coordinates.q === playersGameState.currentPlayerCoordinates?.q &&
-                    player.coordinates.r === playersGameState.currentPlayerCoordinates?.r
+        dispatch(
+            updatePlayersGameState({
+                players: playersGameState.players.reduce((memo, player) => {
+                    const isCurrentPlayer =
+                        player.coordinates.q === playersGameState.currentPlayerCoordinates?.q &&
+                        player.coordinates.r === playersGameState.currentPlayerCoordinates?.r
 
-                if (isCurrentPlayer) {
-                    memo.push({
-                        ...player,
-                        config: {
-                            ...player.config,
-                            lastViewDirection: getPlayerViewDirection(
-                                { q: player.coordinates.q, r: player.coordinates.r },
-                                { q: hex.q, r: hex.r },
-                                player.config.lastViewDirection,
-                            ),
-                        },
-                    })
-                } else {
-                    memo.push(player)
-                }
+                    if (isCurrentPlayer) {
+                        memo.push({
+                            ...player,
+                            config: {
+                                ...player.config,
+                                lastViewDirection: getPlayerViewDirection(
+                                    { q: player.coordinates.q, r: player.coordinates.r },
+                                    { q: hex.q, r: hex.r },
+                                    player.config.lastViewDirection,
+                                ),
+                            },
+                        })
+                    } else {
+                        memo.push(player)
+                    }
 
-                return memo
-            }, []),
-        }))
+                    return memo
+                }, []),
+            }),
+        )
     }
 
     useEffect(() => {
         const { grid: initialGrid, players } = getInitialGameConfig()
 
         setGrid(initialGrid)
-        setPlayersGameState({ players, currentPlayerCoordinates: players[0].coordinates })
+        dispatch(updatePlayersGameState({ players, currentPlayerCoordinates: players[0].coordinates }))
     }, [])
 
     useEffect(() => {
         if (!grid || !currentPlayer) return
 
-        setPlayerMoveState((state) => ({
-            ...state,
-            availableHexesToMove:
-                playerMoveState.moveType === MoveType.MOVE
-                    ? getAvailableHexesToMove(grid, playersGameState.players, currentPlayer)
-                    : getAvailableHexesToAttack(grid, currentPlayer, playerMoveState.moveType),
-        }))
+        dispatch(
+            updatePlayerMoveState({
+                availableHexesToMove:
+                    playerMoveState.moveType === MoveType.MOVE
+                        ? getAvailableHexesToMove(grid, playersGameState.players, currentPlayer)
+                        : getAvailableHexesToAttack(grid, currentPlayer, playerMoveState.moveType),
+            }),
+        )
     }, [currentPlayer, playerMoveState.moveType, playersGameState.players])
 
     return (
