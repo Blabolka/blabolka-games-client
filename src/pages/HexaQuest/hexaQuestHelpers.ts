@@ -110,7 +110,11 @@ export const getAvailableHexesToMove = (grid: Grid<Hex>, players: PlayerConfigIt
     return updatedGrid.reduce<Hex[]>((memo, hex) => {
         const playerOnHex = getPlayerByCoordinates(players, hex)
 
-        const { path: pathToHex } = hexagonPathfinding.aStar({ grid: updatedGrid, start: startHexagon, goal: hex })
+        const { path: pathToHex } = hexagonPathfinding.aStarCustom({
+            grid: updatedGrid,
+            start: startHexagon,
+            goal: hex,
+        })
         const moveCostsSum = sumPathMoveCost(pathToHex)
 
         const isFilteredByPathCost = moveCostsSum > player.config.remainingMoveCost
@@ -162,7 +166,7 @@ export const getPathToMove = (grid: Grid<Hex>, players: PlayerConfigItem[], play
     const goalHexagon = updatedGrid.getHex({ q: goal.q, r: goal.r })
 
     return startHexagon && goalHexagon
-        ? hexagonPathfinding.aStar({
+        ? hexagonPathfinding.aStarCustom({
               grid: updatedGrid,
               start: startHexagon,
               goal: goalHexagon,

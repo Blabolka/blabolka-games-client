@@ -1,8 +1,16 @@
 import dijkstrajs from 'dijkstrajs'
+import { Grid, ring } from 'honeycomb-grid'
 import { Hex } from '@entityTypes/hexaQuest'
 import { aStar as aStarAbstract } from 'abstract-astar'
-import { defineHex, Grid, Orientation, ring, spiral } from 'honeycomb-grid'
-import { updateGridMoveCosts, calculateTimeToFindPathToEveryNode } from './hexagonPathfindingTesting'
+import { runTesting } from './hexagonPathfindingTesting'
+import { findPath as customAStarFindPath } from '@services/algorithms/aStar'
+import { findPath as customDijktraFindPath } from '@services/algorithms/dijkstra'
+
+export enum GridType {
+    NORMAL = 'normal',
+    RANDOM = 'random',
+    INACCESSIBLE = 'inaccessible',
+}
 
 export type PathfindingAlgorithmResult = {
     path: Hex[]
@@ -20,7 +28,7 @@ const parseHexStringCoordinates = (hexStringCoordinates: string) => {
     return { q: Number(q), r: Number(r), s: Number(s) }
 }
 
-const getWeightedGraphFromGrid = (grid: Grid<Hex>) => {
+const getWeightedGraphFromGrid = (grid: Grid<Hex>): Record<string, Record<string, number>> => {
     return grid.reduce((graph, tile) => {
         const neighbours = grid
             .traverse(
@@ -78,40 +86,48 @@ const hexagonPathfinding = () => {
         }
     }
 
-    const runTesting = () => {
-        const Tile = defineHex({ dimensions: 40, origin: 'topLeft', orientation: Orientation.FLAT })
-        const grids = [
-            { label: 'Small Grid', radius: 4 },
-            { label: 'Medium Grid', radius: 6 },
-            { label: 'Large Grid', radius: 8 },
-            { label: 'X Large Grid', radius: 10 },
-        ].map((gridData) => ({
-            ...gridData,
-            grid: updateGridMoveCosts(new Grid(Tile, spiral({ radius: gridData.radius }))),
-        }))
+    const aStarCustom = ({ grid, start, goal }: PathfindingAlgorithmRequiredData): PathfindingAlgorithmResult => {
+        const graph = getWeightedGraphFromGrid(grid)
 
-        const timeToFindPathToEveryNode = grids.reduce(
-            (memo, gridData) => ({
-                ...memo,
-                [`${gridData.label} (radius ${gridData.radius}, items: ${gridData.grid.toArray().length})`]:
-                    calculateTimeToFindPathToEveryNode(
-                        gridData.grid,
-                        gridData.grid.getHex({
-                            q: 0,
-                            r: 0,
-                        }),
-                    ),
-            }),
-            {},
-        )
+        const started = Date.now()
+        const { path: shortestPath } = customAStarFindPath(graph, start.toString(), goal.toString(), (tile) => {
+            const hex = grid.getHex(parseHexStringCoordinates(tile))
+            return hex ? grid.distance(hex, goal) : Infinity
+        })
+        const time = Date.now() - started
 
-        console.log('\n\n')
-        console.info('Time to find path to every node:')
-        console.table(timeToFindPathToEveryNode)
-        console.log('\n\n')
+        const path = shortestPath.reduce<Hex[]>((memo, hexString: string) => {
+            const hex = grid.getHex(parseHexStringCoordinates(hexString))
+            return hex ? [...memo, hex] : memo
+        }, [])
+
+        return {
+            path,
+            time,
+        }
     }
 
-    return { aStar, dijkstra, runTesting }
+    const dijkstraCustom = ({ grid, start, goal }: PathfindingAlgorithmRequiredData): PathfindingAlgorithmResult => {
+        const graph = getWeightedGraphFromGrid(grid)
+        const startId = start.toString()
+        const goalId = goal.toString()
+
+        const started = Date.now()
+        const { path: shortestPath } = customDijktraFindPath(graph, startId, goalId)
+        const time = Date.now() - started
+
+        const path = shortestPath.reduce<Hex[]>((memo, hexString: string) => {
+            const hex = grid.getHex(parseHexStringCoordinates(hexString))
+            return hex ? [...memo, hex] : memo
+        }, [])
+
+        return {
+            path,
+            time,
+        }
+    }
+
+    return { aStar, dijkstra, aStarCustom, dijkstraCustom, runTesting }
 }
 
 export default hexagonPathfinding()
