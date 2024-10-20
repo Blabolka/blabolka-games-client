@@ -15,17 +15,22 @@ const HexagonField = ({ rendererState }: HexagonFieldProps) => {
     const { x, y, width, height } = calculateHexagonFieldImageSize(hex)
 
     return (
-        <HexagonImage
-            x={x}
-            y={y}
-            width={width}
-            height={height}
-            aria-label="Hexagon Field Image"
-            image={getHexagonFieldImageByType(hex.config?.type)}
-            className={classnames({
-                hexagon__inaccessible: !rendererState.isHexAccessibleByPlayer,
-            })}
-        />
+        <>
+            <HexagonImage
+                x={x}
+                y={y}
+                width={width}
+                height={height}
+                aria-label="Hexagon Field Image"
+                image={getHexagonFieldImageByType(hex.config?.type)}
+                className={classnames({
+                    hexagon__inaccessible: !rendererState.isHexAccessibleByPlayer,
+                })}
+            />
+            <text x={hex.x} y={hex.y}>
+                ({hex.q},{hex.r})
+            </text>
+        </>
     )
 }
 
