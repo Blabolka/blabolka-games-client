@@ -199,7 +199,7 @@ const hexagonPathfinding = () => {
         })
         const time = Date.now() - started
 
-        const path = shortestPath.reduce<Hex[]>((memo, hexString: string) => {
+        const path = shortestPath.reduce((memo, hexString: string) => {
             const hex = grid.getHex(parseHexStringCoordinates(hexString))
             return hex ? [...memo, hex] : memo
         }, [])

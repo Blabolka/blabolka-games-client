@@ -89,7 +89,7 @@ export const MOVE_COST_BY_PLAYER_AND_HEX_TYPE = {
     [PlayerType.WARRIOR]: {
         [HexType.DEFAULT]: 1,
         [HexType.BUSH]: 2,
-        [HexType.FOREST]: 3,
+        [HexType.FOREST]: Infinity,
         [HexType.WATER]: Infinity,
     },
     [PlayerType.ARCHER]: {
@@ -124,16 +124,28 @@ export const DEFAULT_HEX_CONFIG: HexConfig = {
     type: HexType.DEFAULT,
 }
 
+// export const HEXES_CONFIG: HexesConfigItem[] = [
+//     { coordinates: { q: 2, r: 4 }, config: { type: HexType.BUSH } },
+//     { coordinates: { q: 5, r: 0 }, config: { type: HexType.FOREST } },
+//     { coordinates: { q: 6, r: 3 }, config: { type: HexType.WATER } },
+//     { coordinates: { q: 6, r: 0 }, config: { type: HexType.FOREST } },
+//     { coordinates: { q: 7, r: -1 }, config: { type: HexType.FOREST } },
+//     { coordinates: { q: 7, r: 2 }, config: { type: HexType.WATER } },
+//     { coordinates: { q: 8, r: 1 }, config: { type: HexType.WATER } },
+//     { coordinates: { q: 9, r: 0 }, config: { type: HexType.WATER } },
+//     { coordinates: { q: 11, r: -3 }, config: { type: HexType.BUSH } },
+// ]
+
 export const HEXES_CONFIG: HexesConfigItem[] = [
-    { coordinates: { q: 2, r: 4 }, config: { type: HexType.BUSH } },
+    { coordinates: { q: 2, r: 4 }, config: { type: HexType.FOREST } },
     { coordinates: { q: 5, r: 0 }, config: { type: HexType.FOREST } },
-    { coordinates: { q: 6, r: 3 }, config: { type: HexType.WATER } },
+    { coordinates: { q: 6, r: 3 }, config: { type: HexType.FOREST } },
     { coordinates: { q: 6, r: 0 }, config: { type: HexType.FOREST } },
     { coordinates: { q: 7, r: -1 }, config: { type: HexType.FOREST } },
-    { coordinates: { q: 7, r: 2 }, config: { type: HexType.WATER } },
-    { coordinates: { q: 8, r: 1 }, config: { type: HexType.WATER } },
-    { coordinates: { q: 9, r: 0 }, config: { type: HexType.WATER } },
-    { coordinates: { q: 11, r: -3 }, config: { type: HexType.BUSH } },
+    { coordinates: { q: 7, r: 2 }, config: { type: HexType.FOREST } },
+    { coordinates: { q: 8, r: 1 }, config: { type: HexType.FOREST } },
+    { coordinates: { q: 9, r: 0 }, config: { type: HexType.FOREST } },
+    { coordinates: { q: 11, r: -3 }, config: { type: HexType.FOREST } },
 ]
 
 export const PLAYERS_CONFIG: PlayerConfigItem[] = createPlayersConfig()
