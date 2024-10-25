@@ -1,7 +1,7 @@
 import { Hex } from '@entityTypes/hexaQuest'
 import { defineHex, Grid, Orientation, spiral } from 'honeycomb-grid'
 
-import hexagonPathfinding, { GridType, PathfindingAlgorithmRequiredData } from './hexagonPathfinding'
+import hexagonPathfinding, { GraphType, PathfindingAlgorithmRequiredData } from './hexagonPathfinding'
 
 export const updateGridWithNormalMoveCosts = (grid: Grid<Hex>) => {
     return grid.map((hex: Hex) => {
@@ -31,6 +31,9 @@ export const calculateEveryAlgorithmResult = ({ grid, start, goal }: Pathfinding
     return {
         aStar: hexagonPathfinding.aStarCustom({ grid, start, goal }),
         dijkstra: hexagonPathfinding.dijkstraCustom({ grid, start, goal }),
+        bestFirstSearch: hexagonPathfinding.bestFirstSearchCustom({ grid, start, goal }),
+        breadthFirstSearch: hexagonPathfinding.breadthFirstSearchCustom({ grid, start, goal }),
+        greedyBestFirstSearch: hexagonPathfinding.greedyBestFirstSearchCustom({ grid, start, goal }),
     }
 }
 
@@ -39,24 +42,43 @@ export const calculatePathToEveryNode = (grid: Grid<Hex>, startHexagon?: Hex) =>
 
     return grid.reduce(
         (memo, hex) => {
-            const { aStar, dijkstra } = calculateEveryAlgorithmResult({
-                grid,
-                start: startHexagon,
-                goal: hex,
-            })
+            const { aStar, dijkstra, bestFirstSearch, breadthFirstSearch, greedyBestFirstSearch } =
+                calculateEveryAlgorithmResult({
+                    grid,
+                    start: startHexagon,
+                    goal: hex,
+                })
 
             return {
-                aStar: {
-                    time: memo.aStar.time + aStar.time,
-                    processedNodes: memo.aStar.processedNodes + aStar.processedNodes,
+                breadthFirstSearch: {
+                    time: memo.breadthFirstSearch.time + breadthFirstSearch?.time,
+                    processedNodes: memo.breadthFirstSearch.processedNodes + breadthFirstSearch?.processedNodes,
+                },
+                bestFirstSearch: {
+                    time: memo.bestFirstSearch.time + bestFirstSearch?.time,
+                    processedNodes: memo.bestFirstSearch.processedNodes + bestFirstSearch?.processedNodes,
+                },
+                greedyBestFirstSearch: {
+                    time: memo.greedyBestFirstSearch.time + greedyBestFirstSearch?.time,
+                    processedNodes: memo.greedyBestFirstSearch.processedNodes + greedyBestFirstSearch?.processedNodes,
                 },
                 dijkstra: {
-                    time: memo.dijkstra.time + dijkstra.time,
-                    processedNodes: memo.dijkstra.processedNodes + dijkstra.processedNodes,
+                    time: memo.dijkstra.time + dijkstra?.time,
+                    processedNodes: memo.dijkstra.processedNodes + dijkstra?.processedNodes,
+                },
+                aStar: {
+                    time: memo.aStar.time + (aStar?.time || 0),
+                    processedNodes: memo.aStar.processedNodes + (aStar?.processedNodes || 0),
                 },
             }
         },
-        { aStar: { time: 0, processedNodes: 0 }, dijkstra: { time: 0, processedNodes: 0 } },
+        {
+            breadthFirstSearch: { time: 0, processedNodes: 0 },
+            bestFirstSearch: { time: 0, processedNodes: 0 },
+            greedyBestFirstSearch: { time: 0, processedNodes: 0 },
+            dijkstra: { time: 0, processedNodes: 0 },
+            aStar: { time: 0, processedNodes: 0 },
+        },
     )
 }
 
@@ -65,11 +87,11 @@ export const runTesting = () => {
         const grid = new Grid(Tile, spiral({ radius: gridData.radius }))
 
         switch (gridData.type) {
-            case GridType.NORMAL:
+            case GraphType.NORMAL:
                 return updateGridWithNormalMoveCosts(grid)
-            case GridType.RANDOM:
+            case GraphType.RANDOM:
                 return updateGridWithRandomMoveCosts(grid)
-            case GridType.INACCESSIBLE:
+            case GraphType.INACCESSIBLE:
                 return updateGridWithInaccessibleMoveCosts(grid, gridData.obstacleRatio)
         }
 
@@ -107,13 +129,13 @@ export const runTesting = () => {
     }
 
     const Tile = defineHex({ dimensions: 40, origin: 'topLeft', orientation: Orientation.FLAT })
-    const testingGridRadius = [4, 6, 8, 10]
+    const testingGridRadius = [15]
     const grids = [
-        { label: 'Normal Move Cost', type: GridType.NORMAL },
-        { label: 'Random Move Cost', type: GridType.RANDOM },
-        { label: 'Inaccessible Move Cost', type: GridType.INACCESSIBLE, obstacleRatio: 0.2 },
-        { label: 'Inaccessible Move Cost', type: GridType.INACCESSIBLE, obstacleRatio: 0.5 },
-        { label: 'Inaccessible Move Cost', type: GridType.INACCESSIBLE, obstacleRatio: 0.8 },
+        { label: 'Normal Move Cost', type: GraphType.NORMAL },
+        { label: 'Random Move Cost', type: GraphType.RANDOM },
+        { label: 'Inaccessible Move Cost', type: GraphType.INACCESSIBLE, obstacleRatio: 0.2 },
+        { label: 'Inaccessible Move Cost', type: GraphType.INACCESSIBLE, obstacleRatio: 0.5 },
+        { label: 'Inaccessible Move Cost', type: GraphType.INACCESSIBLE, obstacleRatio: 0.8 },
     ]
         .map((gridData) =>
             testingGridRadius.map((gridRadius) => {

@@ -5,8 +5,11 @@ import { aStar as aStarAbstract } from 'abstract-astar'
 import { runTesting } from './hexagonPathfindingTesting'
 import { findPath as customAStarFindPath } from '@services/algorithms/aStar'
 import { findPath as customDijktraFindPath } from '@services/algorithms/dijkstra'
+import { findPath as customBestFirstSearchFindPath } from '@services/algorithms/bestFirstSearch'
+import { findPath as customBreadthFirstSearchFindPath } from '@services/algorithms/breadthFirstSearch'
+import { findPath as customGreedyBestFirstSearchFindPath } from '@services/algorithms/greedyBestFirstSearch'
 
-export enum GridType {
+export enum GraphType {
     NORMAL = 'normal',
     RANDOM = 'random',
     INACCESSIBLE = 'inaccessible',
@@ -30,27 +33,31 @@ const parseHexStringCoordinates = (hexStringCoordinates: string) => {
 }
 
 const getWeightedGraphFromGrid = (grid: Grid<Hex>): Record<string, Record<string, number>> => {
-    return grid.reduce((graph, tile) => {
-        const neighbours = grid
+    const graph: Record<string, Record<string, number>> = {}
+    const tiles = grid.toArray()
+
+    for (const tile of tiles) {
+        const tileId = tile.toString()
+        const neighbours: Record<string, number> = {}
+
+        const neighborTiles = grid
             .traverse(
                 ring({
                     radius: 1,
                     center: tile,
                 }),
             )
-            .reduce(
-                (neighboursGraph, neighbourTile) => ({
-                    ...neighboursGraph,
-                    [neighbourTile.toString()]: neighbourTile.config?.moveCost || Infinity,
-                }),
-                {},
-            )
+            .toArray()
 
-        return {
-            ...graph,
-            [tile.toString()]: neighbours,
+        for (const neighbourTile of neighborTiles) {
+            const neighbourId = neighbourTile.toString()
+            neighbours[neighbourId] = neighbourTile.config?.moveCost || Infinity
         }
-    }, {})
+
+        graph[tileId] = neighbours
+    }
+
+    return graph
 }
 
 const hexagonPathfinding = () => {
@@ -91,17 +98,14 @@ const hexagonPathfinding = () => {
 
     const aStarCustom = ({ grid, start, goal }: PathfindingAlgorithmRequiredData): PathfindingAlgorithmResult => {
         const graph = getWeightedGraphFromGrid(grid)
+        const startId = start.toString()
+        const goalId = goal.toString()
 
         const started = Date.now()
-        const { path: shortestPath, processedNodes } = customAStarFindPath(
-            graph,
-            start.toString(),
-            goal.toString(),
-            (tile) => {
-                const hex = grid.getHex(parseHexStringCoordinates(tile))
-                return hex ? grid.distance(hex, goal) : Infinity
-            },
-        )
+        const { path: shortestPath, processedNodes } = customAStarFindPath(graph, startId, goalId, (tile) => {
+            const hex = grid.getHex(parseHexStringCoordinates(tile))
+            return hex ? grid.distance(hex, goal) : Infinity
+        })
         const time = Date.now() - started
 
         const path = shortestPath.reduce<Hex[]>((memo, hexString: string) => {
@@ -137,7 +141,99 @@ const hexagonPathfinding = () => {
         }
     }
 
-    return { aStar, dijkstra, aStarCustom, dijkstraCustom, runTesting }
+    const bestFirstSearchCustom = ({
+        grid,
+        start,
+        goal,
+    }: PathfindingAlgorithmRequiredData): PathfindingAlgorithmResult => {
+        const graph = getWeightedGraphFromGrid(grid)
+        const startId = start.toString()
+        const goalId = goal.toString()
+
+        const started = Date.now()
+        const { path: shortestPath, processedNodes } = customBestFirstSearchFindPath(graph, startId, goalId)
+        const time = Date.now() - started
+
+        const path = shortestPath.reduce<Hex[]>((memo, hexString: string) => {
+            const hex = grid.getHex(parseHexStringCoordinates(hexString))
+            return hex ? [...memo, hex] : memo
+        }, [])
+
+        return {
+            path,
+            time,
+            processedNodes,
+        }
+    }
+
+    const greedyBestFirstSearchCustom = ({
+        grid,
+        start,
+        goal,
+    }: PathfindingAlgorithmRequiredData): PathfindingAlgorithmResult => {
+        const graph = getWeightedGraphFromGrid(grid)
+        const startId = start.toString()
+        const goalId = goal.toString()
+
+        const started = Date.now()
+        const { path: shortestPath, processedNodes } = customGreedyBestFirstSearchFindPath(
+            graph,
+            startId,
+            goalId,
+            (tile) => {
+                const hex = grid.getHex(parseHexStringCoordinates(tile))
+                return hex ? grid.distance(hex, goal) : Infinity
+            },
+        )
+        const time = Date.now() - started
+
+        const path = shortestPath.reduce<Hex[]>((memo, hexString: string) => {
+            const hex = grid.getHex(parseHexStringCoordinates(hexString))
+            return hex ? [...memo, hex] : memo
+        }, [])
+
+        return {
+            path,
+            time,
+            processedNodes,
+        }
+    }
+
+    const breadthFirstSearchCustom = ({
+        grid,
+        start,
+        goal,
+    }: PathfindingAlgorithmRequiredData): PathfindingAlgorithmResult => {
+        const graph = getWeightedGraphFromGrid(grid)
+        const startId = start.toString()
+        const goalId = goal.toString()
+
+        const started = Date.now()
+        const { path: shortestPath, processedNodes } = customBreadthFirstSearchFindPath(graph, startId, goalId)
+        const time = Date.now() - started
+
+        const path = shortestPath.reduce<Hex[]>((memo, hexString: string) => {
+            const hex = grid.getHex(parseHexStringCoordinates(hexString))
+            return hex ? [...memo, hex] : memo
+        }, [])
+
+        return {
+            path,
+            time,
+            processedNodes,
+        }
+    }
+
+    return {
+        aStar,
+        dijkstra,
+        aStarCustom,
+        dijkstraCustom,
+        bestFirstSearchCustom,
+        breadthFirstSearchCustom,
+        greedyBestFirstSearchCustom,
+        runTesting,
+    }
 }
 
 export default hexagonPathfinding()
