@@ -1,7 +1,13 @@
 import { Hex } from '@entityTypes/hexaQuest'
 import { defineHex, Grid, Orientation, spiral } from 'honeycomb-grid'
 
-import hexagonPathfinding, { GraphType, PathfindingAlgorithmRequiredData } from './hexagonPathfinding'
+import hexagonPathfinding, { PathfindingAlgorithmRequiredData } from './hexagonPathfinding'
+
+export enum GraphType {
+    NORMAL = 'normal',
+    RANDOM = 'random',
+    INACCESSIBLE = 'inaccessible',
+}
 
 export const updateGridWithNormalMoveCosts = (grid: Grid<Hex>) => {
     return grid.map((hex: Hex) => {
@@ -11,10 +17,10 @@ export const updateGridWithNormalMoveCosts = (grid: Grid<Hex>) => {
     })
 }
 
-export const updateGridWithRandomMoveCosts = (grid: Grid<Hex>) => {
+export const updateGridWithRandomMoveCosts = (grid: Grid<Hex>, randomRatio: number) => {
     return grid.map((hex: Hex) => {
         const newHex: Hex = hex.clone()
-        newHex.config = { moveCost: Math.ceil(Math.random() * 10) }
+        newHex.config = { moveCost: Math.random() < randomRatio ? Math.ceil(Math.random() * 10) : 1 }
         return newHex
     })
 }
@@ -27,57 +33,90 @@ export const updateGridWithInaccessibleMoveCosts = (grid: Grid<Hex>, obstacleRat
     })
 }
 
-export const calculateEveryAlgorithmResult = ({ grid, start, goal }: PathfindingAlgorithmRequiredData) => {
+export const calculateEveryAlgorithmResultFromStart = ({
+    grid,
+    start,
+}: Required<Pick<PathfindingAlgorithmRequiredData, 'grid' | 'start'>>) => {
     return {
-        aStar: hexagonPathfinding.aStarCustom({ grid, start, goal }),
-        dijkstra: hexagonPathfinding.dijkstraCustom({ grid, start, goal }),
-        bestFirstSearch: hexagonPathfinding.bestFirstSearchCustom({ grid, start, goal }),
-        breadthFirstSearch: hexagonPathfinding.breadthFirstSearchCustom({ grid, start, goal }),
-        greedyBestFirstSearch: hexagonPathfinding.greedyBestFirstSearchCustom({ grid, start, goal }),
+        breadthFirstSearch: hexagonPathfinding.breadthFirstSearchAllPaths({ grid, start }),
+        dijkstra: hexagonPathfinding.dijkstraAllPaths({ grid, start }),
+        spfaSearch: hexagonPathfinding.spfaSearchAllPaths({ grid, start }),
     }
 }
 
-export const calculatePathToEveryNode = (grid: Grid<Hex>, startHexagon?: Hex) => {
+export const calculateEveryAlgorithmResultFromStartToGoal = ({
+    grid,
+    start,
+    goal,
+}: PathfindingAlgorithmRequiredData) => {
+    return {
+        aStar: hexagonPathfinding.aStar({ grid, start, goal }),
+        dijkstra: hexagonPathfinding.dijkstra({ grid, start, goal }),
+        breadthFirstSearch: hexagonPathfinding.breadthFirstSearch({ grid, start, goal }),
+        greedyBestFirstSearch: hexagonPathfinding.greedyBestFirstSearch({ grid, start, goal }),
+    }
+}
+
+export const findPathFromStartToEveryNode = (grid: Grid<Hex>, startHexagon?: Hex) => {
+    if (!startHexagon) return {}
+
+    const { dijkstra, spfaSearch, breadthFirstSearch } = calculateEveryAlgorithmResultFromStart({
+        grid,
+        start: startHexagon,
+    })
+
+    return {
+        breadthFirstSearch: {
+            time: breadthFirstSearch?.time,
+            processedNodes: breadthFirstSearch?.processedNodes,
+        },
+        spfaSearch: {
+            time: spfaSearch?.time,
+            processedNodes: spfaSearch?.processedNodes,
+        },
+        dijkstra: {
+            time: dijkstra?.time,
+            processedNodes: dijkstra?.processedNodes,
+        },
+    }
+}
+
+export const findPathFromStartToEveryNodeOneByOne = (grid: Grid<Hex>, startHexagon?: Hex) => {
     if (!startHexagon) return {}
 
     return grid.reduce(
         (memo, hex) => {
-            const { aStar, dijkstra, bestFirstSearch, breadthFirstSearch, greedyBestFirstSearch } =
-                calculateEveryAlgorithmResult({
+            const { aStar, dijkstra, breadthFirstSearch, greedyBestFirstSearch } =
+                calculateEveryAlgorithmResultFromStartToGoal({
                     grid,
                     start: startHexagon,
                     goal: hex,
                 })
 
             return {
-                breadthFirstSearch: {
-                    time: memo.breadthFirstSearch.time + breadthFirstSearch?.time,
-                    processedNodes: memo.breadthFirstSearch.processedNodes + breadthFirstSearch?.processedNodes,
-                },
-                bestFirstSearch: {
-                    time: memo.bestFirstSearch.time + bestFirstSearch?.time,
-                    processedNodes: memo.bestFirstSearch.processedNodes + bestFirstSearch?.processedNodes,
-                },
                 greedyBestFirstSearch: {
                     time: memo.greedyBestFirstSearch.time + greedyBestFirstSearch?.time,
                     processedNodes: memo.greedyBestFirstSearch.processedNodes + greedyBestFirstSearch?.processedNodes,
-                },
-                dijkstra: {
-                    time: memo.dijkstra.time + dijkstra?.time,
-                    processedNodes: memo.dijkstra.processedNodes + dijkstra?.processedNodes,
                 },
                 aStar: {
                     time: memo.aStar.time + (aStar?.time || 0),
                     processedNodes: memo.aStar.processedNodes + (aStar?.processedNodes || 0),
                 },
+                breadthFirstSearch: {
+                    time: memo.breadthFirstSearch.time + breadthFirstSearch?.time,
+                    processedNodes: memo.breadthFirstSearch.processedNodes + breadthFirstSearch?.processedNodes,
+                },
+                dijkstra: {
+                    time: memo.dijkstra.time + dijkstra?.time,
+                    processedNodes: memo.dijkstra.processedNodes + dijkstra?.processedNodes,
+                },
             }
         },
         {
-            breadthFirstSearch: { time: 0, processedNodes: 0 },
-            bestFirstSearch: { time: 0, processedNodes: 0 },
             greedyBestFirstSearch: { time: 0, processedNodes: 0 },
-            dijkstra: { time: 0, processedNodes: 0 },
             aStar: { time: 0, processedNodes: 0 },
+            breadthFirstSearch: { time: 0, processedNodes: 0 },
+            dijkstra: { time: 0, processedNodes: 0 },
         },
     )
 }
@@ -90,7 +129,7 @@ export const runTesting = () => {
             case GraphType.NORMAL:
                 return updateGridWithNormalMoveCosts(grid)
             case GraphType.RANDOM:
-                return updateGridWithRandomMoveCosts(grid)
+                return updateGridWithRandomMoveCosts(grid, gridData.randomRatio)
             case GraphType.INACCESSIBLE:
                 return updateGridWithInaccessibleMoveCosts(grid, gridData.obstacleRatio)
         }
@@ -98,10 +137,11 @@ export const runTesting = () => {
         return grid
     }
 
-    const getGridTestingLabel = (gridData: any) => {
+    const getGridTestingLabel = (gridData: any, index: number) => {
         const variables = [
             { label: 'radius', value: gridData.radius },
             { label: 'items', value: gridData.grid.toArray().length },
+            { label: 'randomRatio', value: gridData.randomRatio },
             { label: 'obstacleRatio', value: gridData.obstacleRatio },
         ]
 
@@ -110,14 +150,14 @@ export const runTesting = () => {
             .map(({ label, value }) => `${label}: ${value}`)
             .join(', ')
 
-        return `${gridData.label} (${variablesMeta})`
+        return `${gridData.label} (${variablesMeta}) - ${index}`
     }
 
     const parseCalculationResultToTable = (calculationResults: any, resultKey: string) => {
-        return calculationResults.reduce((memo, gridData) => {
+        return calculationResults.reduce((memo, gridData, index: number) => {
             return {
                 ...memo,
-                [getGridTestingLabel(gridData)]: Object.entries(gridData.result).reduce(
+                [getGridTestingLabel(gridData, index)]: Object.entries(gridData.result).reduce(
                     (memo, [key, value]: any) => ({
                         ...memo,
                         [key]: value?.[resultKey],
@@ -129,13 +169,19 @@ export const runTesting = () => {
     }
 
     const Tile = defineHex({ dimensions: 40, origin: 'topLeft', orientation: Orientation.FLAT })
-    const testingGridRadius = [15]
+
+    // const testingGridRadius = [6, 8, 10] // For testing from center to every node one by one
+    const testingGridRadius = [100, 100, 100] // For testing from center to every node
+
     const grids = [
         { label: 'Normal Move Cost', type: GraphType.NORMAL },
-        { label: 'Random Move Cost', type: GraphType.RANDOM },
-        { label: 'Inaccessible Move Cost', type: GraphType.INACCESSIBLE, obstacleRatio: 0.2 },
-        { label: 'Inaccessible Move Cost', type: GraphType.INACCESSIBLE, obstacleRatio: 0.5 },
-        { label: 'Inaccessible Move Cost', type: GraphType.INACCESSIBLE, obstacleRatio: 0.8 },
+        // { label: 'Random Move Cost', type: GraphType.RANDOM, randomRatio: 0.2 },
+        // { label: 'Random Move Cost', type: GraphType.RANDOM, randomRatio: 0.5 },
+        // { label: 'Random Move Cost', type: GraphType.RANDOM, randomRatio: 0.8 },
+        // { label: 'Random Move Cost', type: GraphType.RANDOM, randomRatio: 1 },
+        // { label: 'Inaccessible Move Cost', type: GraphType.INACCESSIBLE, obstacleRatio: 0.2 },
+        // { label: 'Inaccessible Move Cost', type: GraphType.INACCESSIBLE, obstacleRatio: 0.5 },
+        // { label: 'Inaccessible Move Cost', type: GraphType.INACCESSIBLE, obstacleRatio: 0.8 },
     ]
         .map((gridData) =>
             testingGridRadius.map((gridRadius) => {
@@ -152,10 +198,10 @@ export const runTesting = () => {
         )
         .flat()
 
-    const calculationResults = grids.map((gridData) => {
+    const pathFromStartToEveryNodeCalculationResult = grids.map((gridData) => {
         return {
             ...gridData,
-            result: calculatePathToEveryNode(
+            result: findPathFromStartToEveryNode(
                 gridData.grid,
                 gridData.grid.getHex({
                     q: 0,
@@ -165,17 +211,50 @@ export const runTesting = () => {
         }
     })
 
-    const timeToFindPathToEveryNodeFromCenter = parseCalculationResultToTable(calculationResults, 'time')
-    const processedNodesToFindPathToEveryNodeFromCenter = parseCalculationResultToTable(
-        calculationResults,
+    const timeToFindPathFromStartToEveryNode = parseCalculationResultToTable(
+        pathFromStartToEveryNodeCalculationResult,
+        'time',
+    )
+    const processedNodesToFindPathFromStartToEveryNode = parseCalculationResultToTable(
+        pathFromStartToEveryNodeCalculationResult,
         'processedNodes',
     )
 
     console.log('\n\n\n')
-    console.log('Time to find path to every node from center:')
-    console.table(timeToFindPathToEveryNodeFromCenter)
+    console.log('Time to find path from start to every node:')
+    console.table(timeToFindPathFromStartToEveryNode)
 
     console.log('\n\n\n')
-    console.log('Processed nodes to find path to every node from center:')
-    console.table(processedNodesToFindPathToEveryNodeFromCenter)
+    console.log('Processed nodes to find path from start to every node:')
+    console.table(processedNodesToFindPathFromStartToEveryNode)
+
+    // const pathFromStartToEveryNodeOneByOneCalculationResult = grids.map((gridData) => {
+    //     return {
+    //         ...gridData,
+    //         result: findPathFromStartToEveryNodeOneByOne(
+    //             gridData.grid,
+    //             gridData.grid.getHex({
+    //                 q: 0,
+    //                 r: 0,
+    //             }),
+    //         ),
+    //     }
+    // })
+    //
+    // const timeToFindPathFromStartToEveryNodeOneByOne = parseCalculationResultToTable(
+    //     pathFromStartToEveryNodeOneByOneCalculationResult,
+    //     'time',
+    // )
+    // const processedNodesToFindPathFromStartToEveryNodeOneByOne = parseCalculationResultToTable(
+    //     pathFromStartToEveryNodeOneByOneCalculationResult,
+    //     'processedNodes',
+    // )
+    //
+    // console.log('\n\n\n')
+    // console.log('Time to find path from start to every node one by one:')
+    // console.table(timeToFindPathFromStartToEveryNodeOneByOne)
+    //
+    // console.log('\n\n\n')
+    // console.log('Processed nodes to find path from start to every node one by one:')
+    // console.table(processedNodesToFindPathFromStartToEveryNodeOneByOne)
 }

@@ -37,7 +37,7 @@ export const findPath = (
             const neighborData = distances.get(neighbor)
 
             if (altCost < neighborData.cost) {
-                const neighborH = estimateFromNodeToGoal(neighbor) // Евристика для сусіда
+                const neighborH = estimateFromNodeToGoal(neighbor)
                 const neighborFScore = altCost + neighborH
                 distances.set(neighbor, { cost: altCost, fScore: neighborFScore, path: [...currentPath, neighbor] })
                 heap.push(neighbor)

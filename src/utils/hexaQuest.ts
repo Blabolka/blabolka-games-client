@@ -20,3 +20,8 @@ export const getHexaQuestInitialState = (): InitialStateType => {
         },
     }
 }
+
+export const parseHexStringCoordinates = (hexStringCoordinates: string) => {
+    const [q, r, s] = hexStringCoordinates.slice(1, -1).split(',')
+    return { q: Number(q), r: Number(r), s: Number(s) }
+}

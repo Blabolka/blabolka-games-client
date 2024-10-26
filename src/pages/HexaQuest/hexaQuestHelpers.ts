@@ -1,5 +1,5 @@
-import { defineHex, Grid, Orientation, rectangle, spiral } from 'honeycomb-grid'
 import hexagonPathfinding from '@services/hexagon/hexagonPathfinding'
+import { defineHex, Grid, Orientation, rectangle, spiral } from 'honeycomb-grid'
 import {
     HEXES_CONFIG,
     PLAYERS_CONFIG,
@@ -106,10 +106,27 @@ export const getAvailableHexesToMove = (grid: Grid<Hex>, players: PlayerConfigIt
 
     if (!startHexagon) return []
 
+    // const { paths } = hexagonPathfinding.spfaSearchAllPathsCustom({
+    //     grid: updatedGrid,
+    //     start: startHexagon,
+    // })
+    //
+    // return Object.entries(paths).reduce<Hex[]>((memo, [goal, { cost }]) => {
+    //     const hex = updatedGrid.getHex(parseHexStringCoordinates(goal))
+    //     if (!hex) return memo
+    //
+    //     const playerOnHex = getPlayerByCoordinates(players, hex)
+    //
+    //     const isFilteredByPathCost = cost > player.config.remainingMoveCost
+    //     const isFilteredBySomePlayerOnHex = !!playerOnHex
+    //
+    //     return !(isFilteredByPathCost || isFilteredBySomePlayerOnHex) ? [...memo, hex] : memo
+    // }, [])
+
     return updatedGrid.reduce<Hex[]>((memo, hex) => {
         const playerOnHex = getPlayerByCoordinates(players, hex)
 
-        const { path: pathToHex } = hexagonPathfinding.aStarCustom({
+        const { path: pathToHex } = hexagonPathfinding.aStar({
             grid: updatedGrid,
             start: startHexagon,
             goal: hex,
@@ -165,7 +182,7 @@ export const getPathToMove = (grid: Grid<Hex>, players: PlayerConfigItem[], play
     const goalHexagon = updatedGrid.getHex({ q: goal.q, r: goal.r })
 
     return startHexagon && goalHexagon
-        ? hexagonPathfinding.aStarCustom({
+        ? hexagonPathfinding.aStar({
               grid: updatedGrid,
               start: startHexagon,
               goal: goalHexagon,

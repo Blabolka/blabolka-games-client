@@ -6,7 +6,7 @@ export const findPath = (
     let processedNodes = 0
     const cameFrom = new Map<string, string>()
     const visited = new Set<string>()
-    const queue = [start]
+    const queue: string[] = [start]
 
     while (queue.length > 0) {
         const currentNode = queue.shift()
@@ -41,6 +41,5 @@ export const findPath = (
         }
     }
 
-    // Якщо шлях не знайдено
     return { path: [], processedNodes }
 }

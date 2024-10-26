@@ -45,13 +45,10 @@ export const findPath = (
                 continue
             }
 
-            if (!visited.has(neighbor)) {
-                cameFrom.set(neighbor, currentNode)
-                heap.push(neighbor)
-            }
+            cameFrom.set(neighbor, currentNode)
+            heap.push(neighbor)
         }
     }
 
-    // Якщо шлях не знайдено
     return { path: [], processedNodes }
 }
