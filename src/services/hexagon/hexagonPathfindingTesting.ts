@@ -170,7 +170,7 @@ export const runTesting = () => {
 
     const Tile = defineHex({ dimensions: 40, origin: 'topLeft', orientation: Orientation.FLAT })
 
-    // const testingGridRadius = [6, 8, 10] // For testing from center to every node one by one
+    // const testingGridRadius = [10, 10, 10] // For testing from center to every node one by one
     const testingGridRadius = [100, 100, 100] // For testing from center to every node
 
     const grids = [

@@ -19,6 +19,10 @@ export const findAllPaths = (
 
         for (const neighbor in neighbors) {
             const weight = neighbors[neighbor]
+            if (weight === Infinity) {
+                continue
+            }
+
             const newCost = currentCost + weight
 
             if (!(neighbor in paths) || newCost < paths[neighbor].cost) {
